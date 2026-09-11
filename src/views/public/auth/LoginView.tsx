@@ -4,6 +4,11 @@ import {
   ArcadeCard,
   ArcadeButton,
   ArcadeInput,
+  ArcadeCheckbox,
+  ArcadeTabs,
+  ArcadeBadge,
+  ArcadeModal,
+  Callout,
   gem1Url as gem1,
   gem2Url as gem2,
   gem3Url as gem3,
@@ -20,6 +25,10 @@ export const LoginView: React.FC = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
+  const [recoveryOpen, setRecoveryOpen] = useState(false);
+  const [recoveryEmail, setRecoveryEmail] = useState('');
+  const [recoverySent, setRecoverySent] = useState(false);
+  const [registerOpen, setRegisterOpen] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,7 +60,7 @@ export const LoginView: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center p-4 relative overflow-hidden bg-canvas font-mono">
+    <div className="min-h-[85vh] w-full flex items-center justify-center p-4 relative overflow-hidden bg-canvas font-mono">
       {/* Scanline CRT overlay */}
       <div className="crt-overlay absolute inset-0 z-50 pointer-events-none" />
 
@@ -73,27 +82,20 @@ export const LoginView: React.FC = () => {
               <label className="block font-['Press_Start_2P',monospace] text-[10px] text-ink-soft mb-1.5">
                 Seleccioná tu Rol
               </label>
-              <div className="grid grid-cols-3 gap-1.5">
-                {(['student', 'teacher', 'admin'] as UserRole[]).map((r) => {
-                  const isSelected = role === r;
-                  return (
-                    <button
-                      key={r}
-                      type="button"
-                      onClick={() => setRole(r)}
-                      className={`flex flex-col sm:flex-row items-center justify-center gap-1 py-1.5 px-1.5 border rounded transition-all cursor-pointer ${
-                        isSelected
-                          ? 'border-brand-2 bg-brand-2/70 text-brand-2'
-                          : 'border-surface-2 bg-surface/50 text-ink-soft hover:border-line'
-                      }`}
-                    >
-                      <span className="[&>svg]:w-3.5 [&>svg]:h-3.5">{roleConfig[r].icon}</span>
-                      <span className="font-['Press_Start_2P',monospace] text-[9px]">
-                        {roleConfig[r].label}
-                      </span>
-                    </button>
-                  );
-                })}
+              <ArcadeTabs
+                tabs={(['student', 'teacher', 'admin'] as UserRole[]).map((r) => ({
+                  id: r,
+                  label: roleConfig[r].label,
+                  icon: roleConfig[r].icon,
+                }))}
+                activeId={role}
+                onChange={(id) => setRole(id as UserRole)}
+              />
+              <div className="mt-2 flex flex-col gap-1">
+                <ArcadeBadge tone="cyan" appearance="outline" size="sm">
+                  {roleConfig[role].tag}
+                </ArcadeBadge>
+                <p className="text-[11px] text-ink-soft">{roleConfig[role].desc}</p>
               </div>
             </div>
 
@@ -119,19 +121,15 @@ export const LoginView: React.FC = () => {
 
               {/* Recordarme y Olvidó contraseña */}
               <div className="flex items-center justify-between text-[11px] text-ink-soft pt-0.5">
-                <label className="inline-flex items-center gap-1.5 cursor-pointer hover:text-brand-2 transition-colors select-none">
-                  <input
-                    type="checkbox"
-                    checked={rememberMe}
-                    onChange={(e) => setRememberMe(e.target.checked)}
-                    className="accent-brand-2 rounded cursor-pointer w-3.5 h-3.5"
-                  />
-                  <span>Recordarme</span>
-                </label>
+                <ArcadeCheckbox
+                  label="Recordarme"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
+                />
 
                 <button
                   type="button"
-                  onClick={() => alert('Recuperación de contraseña enviada al correo institucional.')}
+                  onClick={() => setRecoveryOpen(true)}
                   className="text-ink-soft hover:text-brand-2 flex items-center gap-1 underline transition-colors cursor-pointer"
                 >
                   <KeyRound className="w-3 h-3" />
@@ -150,7 +148,7 @@ export const LoginView: React.FC = () => {
                   <span>¿Aún no tenés cuenta?</span>
                   <button
                     type="button"
-                    onClick={() => alert('Redirigiendo a registro institucional...')}
+                    onClick={() => setRegisterOpen(true)}
                     className="text-brand-2 hover:text-brand-2 font-bold underline flex items-center gap-1 cursor-pointer"
                   >
                     <UserPlus className="w-3 h-3" />
@@ -221,6 +219,62 @@ export const LoginView: React.FC = () => {
           </p>
         </div>
       </div>
+
+      <ArcadeModal
+        open={recoveryOpen}
+        onClose={() => {
+          setRecoveryOpen(false);
+          setRecoverySent(false);
+        }}
+        title="Recuperar contraseña"
+        subtitle="Te enviamos un enlace de restablecimiento a tu correo institucional."
+        tone="cyan"
+        size="sm"
+        footer={
+          !recoverySent && (
+            <ArcadeButton
+              variant="cyan"
+              size="sm"
+              disabled={recoveryEmail.trim() === ''}
+              onClick={() => setRecoverySent(true)}
+            >
+              Enviar enlace
+            </ArcadeButton>
+          )
+        }
+      >
+        {recoverySent ? (
+          <Callout variant="tip" title="Enlace enviado">
+            Revisá la bandeja de {recoveryEmail}. El enlace vence en 30 minutos.
+          </Callout>
+        ) : (
+          <ArcadeInput
+            label="Correo institucional"
+            type="email"
+            placeholder="usuario@frt.utn.edu.ar"
+            value={recoveryEmail}
+            onChange={(e) => setRecoveryEmail(e.target.value)}
+          />
+        )}
+      </ArcadeModal>
+
+      <ArcadeModal
+        open={registerOpen}
+        onClose={() => setRegisterOpen(false)}
+        title="Registro institucional"
+        tone="magenta"
+        size="sm"
+        footer={
+          <ArcadeButton variant="magenta" size="sm" onClick={() => setRegisterOpen(false)}>
+            Entendido
+          </ArcadeButton>
+        }
+      >
+        <Callout variant="note" title="Alta de cuenta">
+          Las cuentas se crean desde el sistema académico de la facultad. Si ya sos alumno o
+          docente, tu legajo habilita el acceso sin registro previo.
+        </Callout>
+      </ArcadeModal>
     </div>
   );
 };
