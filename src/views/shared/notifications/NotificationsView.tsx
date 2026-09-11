@@ -1,7 +1,23 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArcadeNavbar, Breadcrumb } from 'tup-arcade-ui';
-import { ArrowLeft, Check, Trash2, Filter } from 'lucide-react';
+import {
+  ArcadeNavbar,
+  Breadcrumb,
+  ArcadeButton,
+  ArcadeCard,
+  ArcadeBadge,
+  ArcadeTabs,
+  ArcadeModal,
+  ArcadeEmptyState,
+  PixelTrophy,
+  PixelStar,
+  PixelBell,
+  PixelChat,
+  PixelCoin,
+  PixelQuiz,
+} from 'tup-arcade-ui';
+import type { ArcadeBadgeTone } from 'tup-arcade-ui';
+import { ArrowLeft, Check, Trash2 } from 'lucide-react';
 
 export type NotificationType = 'all' | 'achievement' | 'challenge' | 'system' | 'message';
 
@@ -19,6 +35,7 @@ export interface NotificationItem {
 export const NotificationsView: React.FC = () => {
   const navigate = useNavigate();
   const [filter, setFilter] = useState<NotificationType>('all');
+  const [confirmClearOpen, setConfirmClearOpen] = useState(false);
   const [notifications, setNotifications] = useState<NotificationItem[]>([
     {
       id: 'n1',
@@ -77,35 +94,50 @@ export const NotificationsView: React.FC = () => {
 
   const clearRead = () => {
     setNotifications(prev => prev.filter(n => !n.read));
+    setConfirmClearOpen(false);
   };
+
+  const countFor = (type: NotificationType) =>
+    type === 'all'
+      ? notifications.length
+      : notifications.filter(n => n.type === type).length;
 
   const getNotificationIcon = (type: NotificationItem['type']) => {
     switch (type) {
       case 'achievement':
-        return <i className="nes-icon is-small trophy" />;
+        return <PixelTrophy className="w-4 h-4" />;
       case 'challenge':
-        return <i className="nes-icon is-small sword" />;
+        return <PixelQuiz className="w-4 h-4" />;
       case 'message':
-        return <i className="nes-icon is-small mail" />;
+        return <PixelChat className="w-4 h-4" />;
       case 'system':
       default:
-        return <i className="nes-icon is-small star" />;
+        return <PixelStar className="w-4 h-4" />;
     }
   };
 
-  const getNotificationColor = (type: NotificationItem['type']) => {
+  const getNotificationTone = (type: NotificationItem['type']): ArcadeBadgeTone => {
     switch (type) {
       case 'achievement':
-        return 'text-gold border-gold/40 bg-gold/20';
+        return 'yellow';
       case 'challenge':
-        return 'text-danger border-danger/40 bg-danger/20';
+        return 'red';
       case 'message':
-        return 'text-brand-2 border-brand-2/40 bg-brand-2/20';
+        return 'cyan';
       case 'system':
       default:
-        return 'text-success border-success/40 bg-success/20';
+        return 'green';
     }
   };
+
+  const typeLabels: Record<NotificationItem['type'], string> = {
+    achievement: 'Logro',
+    challenge: 'Desafío',
+    message: 'Mensaje',
+    system: 'Sistema',
+  };
+
+  const readCount = notifications.filter(n => n.read).length;
 
   return (
     <div className="min-h-screen w-full bg-canvas text-ink font-mono relative overflow-hidden">
@@ -125,17 +157,17 @@ export const NotificationsView: React.FC = () => {
 
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 mt-4 pb-4 border-b border-surface-2">
           <div className="flex items-center gap-3">
-            <button
-              type="button"
+            <ArcadeButton
+              variant="cyan"
+              size="sm"
               onClick={() => navigate(-1)}
-              className="p-2 rounded bg-surface border border-line hover:border-brand-2 text-ink-soft hover:text-brand-2 transition-all cursor-pointer"
-              title="Volver"
+              aria-label="Volver"
             >
               <ArrowLeft className="w-4 h-4" />
-            </button>
+            </ArcadeButton>
             <div>
               <div className="flex items-center gap-2">
-                <i className="nes-icon is-small star" />
+                <PixelBell className="w-4 h-4" />
                 <h1 className="font-['Press_Start_2P',monospace] text-sm sm:text-base text-gold">
                   CENTRO DE NOTIFICACIONES
                 </h1>
@@ -147,72 +179,58 @@ export const NotificationsView: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-2 self-end sm:self-auto">
-            <button
-              type="button"
-              onClick={markAllAsRead}
-              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded bg-surface border border-line hover:border-brand-2 text-xs text-ink-soft hover:text-brand-2 cursor-pointer"
-            >
+            <ArcadeButton variant="cyan" size="sm" onClick={markAllAsRead}>
               <Check className="w-3.5 h-3.5" />
               <span>Marcar leídas</span>
-            </button>
-            <button
-              type="button"
-              onClick={clearRead}
-              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded bg-surface border border-line hover:border-danger text-xs text-ink-soft hover:text-danger cursor-pointer"
+            </ArcadeButton>
+            <ArcadeButton
+              variant="magenta"
+              size="sm"
+              disabled={readCount === 0}
+              onClick={() => setConfirmClearOpen(true)}
             >
               <Trash2 className="w-3.5 h-3.5" />
               <span>Limpiar</span>
-            </button>
+            </ArcadeButton>
           </div>
         </div>
 
-        <div className="flex items-center gap-2 overflow-x-auto pb-3 mb-6">
-          <span className="text-xs text-ink-soft flex items-center gap-1 font-['Press_Start_2P',monospace] text-[9px] mr-2">
-            <Filter className="w-3 h-3" /> TIPO:
-          </span>
-          {[
-            { key: 'all', label: 'Todas' },
-            { key: 'achievement', label: 'Logros' },
-            { key: 'challenge', label: 'Desafíos' },
-            { key: 'message', label: 'Mensajes' },
-            { key: 'system', label: 'Sistema' },
-          ].map((tab) => (
-            <button
-              key={tab.key}
-              type="button"
-              onClick={() => setFilter(tab.key as NotificationType)}
-              className={`px-3 py-1 rounded text-xs transition-all cursor-pointer whitespace-nowrap ${
-                filter === tab.key
-                  ? 'bg-gold text-slate-950 font-bold border border-gold shadow-[0_0_8px_rgba(251,191,36,0.5)]'
-                  : 'bg-surface text-ink-soft hover:text-ink border border-surface-2'
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
+        <ArcadeTabs
+          className="mb-6"
+          activeId={filter}
+          onChange={(id) => setFilter(id as NotificationType)}
+          tabs={[
+            { id: 'all', label: 'Todas', badge: countFor('all') },
+            { id: 'achievement', label: 'Logros', badge: countFor('achievement') },
+            { id: 'challenge', label: 'Desafíos', badge: countFor('challenge') },
+            { id: 'message', label: 'Mensajes', badge: countFor('message') },
+            { id: 'system', label: 'Sistema', badge: countFor('system') },
+          ]}
+        />
 
         <div className="flex flex-col gap-3">
           {filteredNotifications.length === 0 ? (
-            <div className="text-center py-16 border-2 border-dashed border-surface-2 rounded-lg">
-              <i className="nes-icon is-large coin mb-4" />
-              <p className="font-['Press_Start_2P',monospace] text-xs text-ink-soft">
-                NO HAY NOTIFICACIONES EN ESTA CATEGORÍA
-              </p>
-            </div>
+            <ArcadeEmptyState
+              title="No hay notificaciones en esta categoría"
+              description="Cuando ocurra un evento de este tipo, lo vas a ver acá."
+              icon={<PixelBell className="w-10 h-10" />}
+              action={
+                filter !== 'all' ? (
+                  <ArcadeButton variant="cyan" size="sm" onClick={() => setFilter('all')}>
+                    Ver todas
+                  </ArcadeButton>
+                ) : undefined
+              }
+            />
           ) : (
             filteredNotifications.map((n) => (
-              <div
+              <ArcadeCard
                 key={n.id}
-                className={`p-4 rounded border transition-all flex items-start gap-4 ${
-                  n.read
-                    ? 'bg-surface/50 border-surface-2 opacity-75'
-                    : 'bg-surface border-gold/60 shadow-[0_0_10px_rgba(251,191,36,0.15)]'
-                }`}
+                variant={n.read ? 'default' : 'yellow'}
+                glow={!n.read}
+                className={`flex items-start gap-4 ${n.read ? 'opacity-75' : ''}`}
               >
-                <div className={`p-2.5 rounded border flex items-center justify-center shrink-0 ${getNotificationColor(n.type)}`}>
-                  {getNotificationIcon(n.type)}
-                </div>
+                <div className="shrink-0 pt-0.5">{getNotificationIcon(n.type)}</div>
 
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between gap-2">
@@ -223,31 +241,54 @@ export const NotificationsView: React.FC = () => {
                   </div>
                   <p className="text-xs text-ink-soft mt-1.5 leading-relaxed">{n.description}</p>
 
-                  {(n.xpReward || n.coinReward) && (
-                    <div className="flex items-center gap-3 mt-2.5">
-                      {n.xpReward && (
-                        <span className="text-[10px] font-['Press_Start_2P',monospace] text-brand-2 bg-brand-2/60 border border-brand-2/40 px-2 py-0.5 rounded">
-                          +{n.xpReward} XP
-                        </span>
-                      )}
-                      {n.coinReward && (
-                        <span className="text-[10px] font-['Press_Start_2P',monospace] text-gold bg-gold/60 border border-gold/40 px-2 py-0.5 rounded flex items-center gap-1">
-                          <i className="nes-icon is-small coin scale-75" />
-                          +{n.coinReward}
-                        </span>
-                      )}
-                    </div>
-                  )}
+                  <div className="flex items-center gap-2 mt-2.5 flex-wrap">
+                    <ArcadeBadge tone={getNotificationTone(n.type)} appearance="outline" size="sm">
+                      {typeLabels[n.type]}
+                    </ArcadeBadge>
+                    {n.xpReward && (
+                      <ArcadeBadge tone="cyan" size="sm">
+                        +{n.xpReward} XP
+                      </ArcadeBadge>
+                    )}
+                    {n.coinReward && (
+                      <ArcadeBadge tone="yellow" size="sm" icon={<PixelCoin className="w-3 h-3" />}>
+                        +{n.coinReward}
+                      </ArcadeBadge>
+                    )}
+                  </div>
                 </div>
 
                 {!n.read && (
                   <span className="w-2.5 h-2.5 rounded-full bg-gold animate-pulse shrink-0 self-center" />
                 )}
-              </div>
+              </ArcadeCard>
             ))
           )}
         </div>
       </main>
+
+      <ArcadeModal
+        open={confirmClearOpen}
+        onClose={() => setConfirmClearOpen(false)}
+        title="Limpiar notificaciones leídas"
+        subtitle={`Se van a borrar ${readCount} notificaciones. No se puede deshacer.`}
+        tone="red"
+        size="sm"
+        footer={
+          <div className="flex gap-2">
+            <ArcadeButton variant="magenta" size="sm" onClick={clearRead}>
+              Limpiar
+            </ArcadeButton>
+            <ArcadeButton variant="cyan" size="sm" onClick={() => setConfirmClearOpen(false)}>
+              Cancelar
+            </ArcadeButton>
+          </div>
+        }
+      >
+        <p className="text-xs text-ink-soft">
+          Las notificaciones sin leer se mantienen intactas.
+        </p>
+      </ArcadeModal>
     </div>
   );
 };

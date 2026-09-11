@@ -1,7 +1,34 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArcadeNavbar, Breadcrumb, ArcadeCard, PixelTrophy, PixelChest } from 'tup-arcade-ui';
-import { Mail, MapPin, IdCard, GraduationCap, Clock, CheckCircle2, Award } from 'lucide-react';
+import {
+  ArcadeNavbar,
+  Breadcrumb,
+  ArcadeCard,
+  ArcadeAvatar,
+  ArcadeBadge,
+  ArcadeButton,
+  ArcadeDrawer,
+  ArcadeInput,
+  ArcadeSelect,
+  ArcadeTextarea,
+  ArcadeTable,
+  ArcadePagination,
+  ArcadeEmptyState,
+  ArcadeTooltip,
+  XPBar,
+  LevelBadge,
+  LivesIndicator,
+  CoinCounter,
+  StreakFlame,
+  BadgeShowcase,
+  PixelTrophy,
+  PixelChest,
+  PixelCoin,
+  PixelCheck,
+  PixelScroll,
+} from 'tup-arcade-ui';
+import type { ArcadeTableColumn, EarnedBadge } from 'tup-arcade-ui';
+import { Mail, MapPin, IdCard, GraduationCap, Clock, Award } from 'lucide-react';
 
 interface PlatformActivity {
   id: string;
@@ -13,8 +40,12 @@ interface PlatformActivity {
   coins?: number;
 }
 
+const ACTIVITY_PAGE_SIZE = 5;
+
 export const ProfileView: React.FC = () => {
   const navigate = useNavigate();
+  const [page, setPage] = useState(1);
+  const [editOpen, setEditOpen] = useState(false);
 
   const user = {
     name: 'Tamara Alvarez',
@@ -24,14 +55,30 @@ export const ProfileView: React.FC = () => {
     career: 'Tecnicatura Universitaria en Programación',
     level: 12,
     levelProgress: 82,
-    avatar: '👩‍💻',
   };
+
+  const [form, setForm] = useState({
+    displayName: user.name,
+    email: user.email,
+    location: user.location,
+    bio: 'Estudiante de la TUP. Me gusta romper contenedores y después arreglarlos.',
+    visibility: 'cohort',
+  });
 
   const stats = [
     { label: 'XP Total', value: '9.850', icon: <span className="font-['Press_Start_2P',monospace] text-brand-2">XP</span> },
-    { label: 'Monedas', value: '730', icon: <i className="nes-icon is-small coin" style={{ transform: 'scale(1.25)' }} /> },
+    { label: 'Monedas', value: '730', icon: <PixelCoin className="w-4 h-4" /> },
     { label: 'Logros', value: '14', icon: <PixelTrophy className="w-4 h-4" /> },
     { label: 'Cursos Cursados', value: '2', icon: <GraduationCap className="w-4 h-4 text-success" /> },
+  ];
+
+  const badges: EarnedBadge[] = [
+    { id: 'b1', name: 'SQL Optimizer Lvl 2', description: 'Optimizaste 10 consultas por debajo de 50ms.', earned: true },
+    { id: 'b2', name: 'Docker Captain', description: 'Superaste el boss fight de despliegue.', earned: true },
+    { id: 'b3', name: 'Racha de 7 días', description: 'Una semana entera sin faltar.', earned: true },
+    { id: 'b4', name: 'Pair Programmer', description: 'Resolviste 5 desafíos en dupla.', earned: true },
+    { id: 'b5', name: 'Refactor Master', description: 'Todavía bloqueado: refactorizá un módulo completo.', earned: false },
+    { id: 'b6', name: 'Zero Bugs', description: 'Todavía bloqueado: entregá un parcial sin errores.', earned: false },
   ];
 
   const activity: PlatformActivity[] = [
@@ -45,6 +92,68 @@ export const ProfileView: React.FC = () => {
     { id: 'a8', course: 'Bases de Datos', courseAccent: 'fuchsia', title: 'Ingresó a la 1ta Cohorte 2026', date: 'Hace 3 semanas', xp: 50 },
   ];
 
+  const pageCount = Math.max(1, Math.ceil(activity.length / ACTIVITY_PAGE_SIZE));
+  const visibleActivity = activity.slice((page - 1) * ACTIVITY_PAGE_SIZE, page * ACTIVITY_PAGE_SIZE);
+
+  const activityColumns: ArcadeTableColumn<PlatformActivity>[] = [
+    {
+      key: 'title',
+      header: 'Evento',
+      render: (row) => (
+        <div className="flex items-start gap-3 min-w-0">
+          {row.coins !== undefined && row.coins < 0 ? (
+            <PixelChest className="w-4 h-4 mt-0.5 shrink-0" />
+          ) : (
+            <PixelCheck className="w-4 h-4 mt-0.5 shrink-0" />
+          )}
+          <span className="text-xs font-bold text-ink">{row.title}</span>
+        </div>
+      ),
+    },
+    {
+      key: 'course',
+      header: 'Curso',
+      render: (row) => (
+        <ArcadeBadge
+          tone={row.courseAccent === 'cyan' ? 'cyan' : 'magenta'}
+          appearance="outline"
+          size="sm"
+        >
+          {row.course}
+        </ArcadeBadge>
+      ),
+    },
+    {
+      key: 'date',
+      header: 'Cuándo',
+      render: (row) => <span className="text-[10px] text-ink-soft font-mono">{row.date}</span>,
+    },
+    {
+      key: 'reward',
+      header: 'Recompensa',
+      align: 'right',
+      render: (row) => (
+        <div className="flex items-center justify-end gap-2">
+          {row.xp !== undefined && (
+            <ArcadeBadge tone="cyan" size="sm" icon={<Award className="w-3 h-3" />}>
+              +{row.xp}
+            </ArcadeBadge>
+          )}
+          {row.coins !== undefined && (
+            <ArcadeBadge
+              tone={row.coins < 0 ? 'red' : 'yellow'}
+              size="sm"
+              icon={<PixelCoin className="w-3 h-3" />}
+            >
+              {row.coins > 0 ? '+' : ''}
+              {row.coins}
+            </ArcadeBadge>
+          )}
+        </div>
+      ),
+    },
+  ];
+
   return (
     <div className="min-h-screen w-full bg-canvas text-ink font-mono relative overflow-hidden">
       <div className="crt-overlay absolute inset-0 pointer-events-none z-50" />
@@ -55,32 +164,33 @@ export const ProfileView: React.FC = () => {
         unreadNotifications={4}
         onNavigateMessages={() => navigate('/messages')}
         onNavigateNotifications={() => navigate('/notifications')}
-        onEditProfile={() => navigate('/profile')}
+        onEditProfile={() => setEditOpen(true)}
         onLogout={() => navigate('/login')}
       />
 
       <main className="w-full px-4 sm:px-8 py-8">
         <Breadcrumb items={[{ label: 'Perfil' }]} onHome={() => navigate('/my-courses')} />
 
-        <div className="mt-4 mb-8">
-          <h1 className="font-['Press_Start_2P',monospace] text-xl md:text-2xl text-brand tracking-wider">
-            Mi Perfil
-          </h1>
-          <p className="text-sm text-ink-soft mt-1">Tus datos de cuenta y tu historial en toda la plataforma.</p>
+        <div className="mt-4 mb-8 flex items-start justify-between gap-4">
+          <div>
+            <h1 className="font-['Press_Start_2P',monospace] text-xl md:text-2xl text-brand tracking-wider">
+              Mi Perfil
+            </h1>
+            <p className="text-sm text-ink-soft mt-1">Tus datos de cuenta y tu historial en toda la plataforma.</p>
+          </div>
+          <ArcadeButton variant="magenta" size="sm" onClick={() => setEditOpen(true)}>
+            Editar perfil
+          </ArcadeButton>
         </div>
 
         {/* Datos básicos */}
         <ArcadeCard variant="default" className="mb-6 flex flex-col sm:flex-row items-start sm:items-center gap-5">
-          <div className="w-20 h-20 shrink-0 rounded bg-brand/15 border-2 border-brand flex items-center justify-center text-4xl">
-            {user.avatar}
-          </div>
+          <ArcadeAvatar name={user.name} size="xl" level={user.level} ring="magenta" />
 
           <div className="flex-1 flex flex-col gap-2">
             <div className="flex items-center gap-2 flex-wrap">
               <h2 className="font-bold text-lg text-ink">{user.name}</h2>
-              <span className="text-[10px] font-['Press_Start_2P',monospace] bg-brand/15 border border-brand/50 text-brand px-2 py-0.5 rounded">
-                Nivel {user.level}
-              </span>
+              <LevelBadge level={user.level} name="Compilador" maxLevel={20} />
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1.5 text-xs text-ink-soft mt-1">
@@ -103,14 +213,14 @@ export const ProfileView: React.FC = () => {
             </div>
 
             <div className="w-full max-w-xs mt-2">
-              <div className="flex justify-between text-[10px] text-ink-soft mb-1">
-                <span>Progreso al Nivel {user.level + 1}</span>
-                <span className="text-brand">{user.levelProgress}%</span>
-              </div>
-              <div className="w-full h-2 bg-canvas border border-surface-2 rounded-sm p-0.5">
-                <div className="h-full bg-brand rounded-sm" style={{ width: `${user.levelProgress}%` }} />
-              </div>
+              <XPBar currentXP={user.levelProgress * 10} levelXP={1000} level={user.level} />
             </div>
+          </div>
+
+          <div className="flex flex-col gap-3 sm:border-l sm:border-surface-2 sm:pl-5">
+            <LivesIndicator lives={4} maxLives={5} />
+            <CoinCounter coins={730} />
+            <StreakFlame days={9} />
           </div>
         </ArcadeCard>
 
@@ -125,6 +235,15 @@ export const ProfileView: React.FC = () => {
           ))}
         </div>
 
+        {/* Logros */}
+        <ArcadeCard variant="yellow" className="mb-6">
+          <div className="flex items-center gap-2 mb-4">
+            <PixelTrophy className="w-4 h-4" />
+            <h3 className="font-['Press_Start_2P',monospace] text-xs text-ink">LOGROS</h3>
+          </div>
+          <BadgeShowcase badges={badges} />
+        </ArcadeCard>
+
         {/* Historial completo de la plataforma */}
         <ArcadeCard variant="default" className="p-0 overflow-hidden">
           <div className="p-4 flex items-center justify-between border-b border-surface-2 bg-surface/60">
@@ -134,61 +253,84 @@ export const ProfileView: React.FC = () => {
                 HISTORIAL EN TODA LA PLATAFORMA
               </h3>
             </div>
-            <span className="text-[10px] text-ink-soft">{activity.length} eventos</span>
+            <ArcadeTooltip content="Eventos registrados en todas tus cohortes">
+              <span className="text-[10px] text-ink-soft">{activity.length} eventos</span>
+            </ArcadeTooltip>
           </div>
 
-          <div className="divide-y divide-surface-2">
-            {activity.map((act) => (
-              <div key={act.id} className="p-4 flex items-center justify-between gap-4 hover:bg-surface/40 transition-colors">
-                <div className="flex items-start gap-3 min-w-0">
-                  {act.coins && act.coins < 0 ? (
-                    <PixelChest className="w-4 h-4 mt-0.5 shrink-0" />
-                  ) : (
-                    <CheckCircle2 className="w-4 h-4 text-success mt-0.5 shrink-0" />
-                  )}
-                  <div className="min-w-0">
-                    <p className="text-xs font-bold text-ink truncate">{act.title}</p>
-                    <div className="flex items-center gap-2 mt-0.5 flex-wrap">
-                      <span
-                        className={`text-[10px] bg-canvas border px-1.5 py-0.5 rounded font-mono ${
-                          act.courseAccent === 'cyan'
-                            ? 'border-brand-2/40 text-brand-2'
-                            : 'border-brand/40 text-brand'
-                        }`}
-                      >
-                        {act.course}
-                      </span>
-                      <span className="text-[10px] text-ink-soft font-mono">{act.date}</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2 shrink-0">
-                  {act.xp && (
-                    <span className="font-['Press_Start_2P',monospace] text-[9px] text-brand-2 bg-brand-2/60 border border-brand-2/40 px-2 py-0.5 rounded flex items-center gap-1">
-                      <Award className="w-3 h-3" />
-                      +{act.xp}
-                    </span>
-                  )}
-                  {act.coins !== undefined && (
-                    <span
-                      className={`font-['Press_Start_2P',monospace] text-[9px] px-2 py-0.5 rounded flex items-center gap-1 border ${
-                        act.coins < 0
-                          ? 'text-danger bg-danger/40 border-danger/40'
-                          : 'text-gold bg-gold/60 border-gold/40'
-                      }`}
-                    >
-                      <i className="nes-icon is-small coin scale-75" />
-                      {act.coins > 0 ? '+' : ''}
-                      {act.coins}
-                    </span>
-                  )}
-                </div>
-              </div>
-            ))}
+          <div className="p-4 flex flex-col gap-4">
+            <ArcadeTable
+              columns={activityColumns}
+              rows={visibleActivity}
+              rowKey={(row) => row.id}
+              emptyState={
+                <ArcadeEmptyState
+                  title="Sin actividad todavía"
+                  description="Cuando completes tu primer desafío, va a aparecer acá."
+                  icon={<PixelScroll className="w-10 h-10" />}
+                />
+              }
+            />
+            <ArcadePagination page={page} pageCount={pageCount} onPageChange={setPage} />
           </div>
         </ArcadeCard>
       </main>
+
+      <ArcadeDrawer
+        open={editOpen}
+        onClose={() => setEditOpen(false)}
+        title="Editar perfil"
+        subtitle="Los datos académicos los administra la facultad."
+        side="right"
+        size="md"
+        footer={
+          <div className="flex gap-2">
+            <ArcadeButton variant="green" size="sm" onClick={() => setEditOpen(false)}>
+              Guardar
+            </ArcadeButton>
+            <ArcadeButton variant="magenta" size="sm" onClick={() => setEditOpen(false)}>
+              Cancelar
+            </ArcadeButton>
+          </div>
+        }
+      >
+        <div className="flex flex-col gap-4">
+          <ArcadeInput
+            label="Nombre para mostrar"
+            value={form.displayName}
+            onChange={(e) => setForm({ ...form, displayName: e.target.value })}
+          />
+          <ArcadeInput
+            label="Correo de contacto"
+            type="email"
+            value={form.email}
+            onChange={(e) => setForm({ ...form, email: e.target.value })}
+          />
+          <ArcadeInput
+            label="Ubicación"
+            value={form.location}
+            onChange={(e) => setForm({ ...form, location: e.target.value })}
+          />
+          <ArcadeSelect
+            label="Visibilidad del perfil"
+            options={[
+              { value: 'public', label: 'Pública en toda la plataforma' },
+              { value: 'cohort', label: 'Solo mi cohorte' },
+              { value: 'private', label: 'Privada' },
+            ]}
+            value={form.visibility}
+            onChange={(e) => setForm({ ...form, visibility: e.target.value })}
+          />
+          <ArcadeTextarea
+            label="Sobre mí"
+            rows={4}
+            maxLength={280}
+            showCount
+            value={form.bio}
+            onChange={(e) => setForm({ ...form, bio: e.target.value })}
+          />
+        </div>
+      </ArcadeDrawer>
     </div>
   );
 };
