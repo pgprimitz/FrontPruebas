@@ -8,6 +8,7 @@ import {
   ArcadeRadioGroup,
   ArcadeBadge,
   ArcadeModal,
+  ArcadeSpinner,
   Callout,
   gem1Url as gem1,
   gem2Url as gem2,
@@ -19,70 +20,139 @@ import { User, GraduationCap, ShieldCheck, KeyRound, UserPlus } from 'lucide-rea
 
 export type UserRole = 'student' | 'teacher' | 'admin';
 
+/**
+ * Each role owns an accent that drives the card, the button and the tag badge,
+ * so switching roles visibly re-skins the panel instead of only swapping text.
+ */
+const roleConfig: Record<
+  UserRole,
+  {
+    label: string;
+    icon: React.ReactNode;
+    tone: 'cyan' | 'yellow' | 'magenta';
+    tag: string;
+    desc: string;
+    identifierLabel: string;
+    identifierPlaceholder: string;
+    identifierAutoComplete: string;
+  }
+> = {
+  student: {
+    label: 'Alumno',
+    icon: <User className="w-4 h-4" />,
+    tone: 'cyan',
+    tag: 'LVL 1 JUGADOR',
+    desc: 'Acceso a misiones, ranking y marketplace de canje.',
+    identifierLabel: 'Usuario o Legajo',
+    identifierPlaceholder: 'Ej: 412349 o gamer_tag',
+    identifierAutoComplete: 'username',
+  },
+  teacher: {
+    label: 'Profesor',
+    icon: <GraduationCap className="w-4 h-4" />,
+    tone: 'yellow',
+    tag: 'MASTER / GUILD',
+    desc: 'Gestión de desafíos, auditoría de IA y calificaciones.',
+    identifierLabel: 'Correo Institucional',
+    identifierPlaceholder: 'docente@frt.utn.edu.ar',
+    identifierAutoComplete: 'email',
+  },
+  admin: {
+    label: 'Admin',
+    icon: <ShieldCheck className="w-4 h-4" />,
+    tone: 'magenta',
+    tag: 'ROOT ACCESS',
+    desc: 'Gobernanza de IA, logs y métricas globales.',
+    identifierLabel: 'Correo Institucional',
+    identifierPlaceholder: 'admin@frt.utn.edu.ar',
+    identifierAutoComplete: 'email',
+  },
+};
+
+const MIN_PASSWORD_LENGTH = 6;
+
 export const LoginView: React.FC = () => {
   const navigate = useNavigate();
   const [role, setRole] = useState<UserRole>('student');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
+  const [errors, setErrors] = useState<{ username?: string; password?: string }>({});
+  const [submitting, setSubmitting] = useState(false);
   const [recoveryOpen, setRecoveryOpen] = useState(false);
   const [recoveryEmail, setRecoveryEmail] = useState('');
   const [recoverySent, setRecoverySent] = useState(false);
   const [registerOpen, setRegisterOpen] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    navigate('/my-courses');
+  const active = roleConfig[role];
+
+  const validate = () => {
+    const next: { username?: string; password?: string } = {};
+
+    if (username.trim() === '') {
+      next.username = `Completá tu ${active.identifierLabel.toLowerCase()}.`;
+    } else if (active.identifierAutoComplete === 'email' && !username.includes('@')) {
+      next.username = 'Usá tu correo institucional completo.';
+    }
+
+    if (password === '') {
+      next.password = 'Completá tu contraseña.';
+    } else if (password.length < MIN_PASSWORD_LENGTH) {
+      next.password = `La contraseña tiene al menos ${MIN_PASSWORD_LENGTH} caracteres.`;
+    }
+
+    return next;
   };
 
-  const roleConfig = {
-    student: {
-      label: 'Alumno',
-      icon: <User className="w-4 h-4" />,
-      accent: 'text-brand-2',
-      tag: 'LVL 1 JUGADOR',
-      desc: 'Acceso a misiones, ranking y marketplace de canje.'
-    },
-    teacher: {
-      label: 'Profesor',
-      icon: <GraduationCap className="w-4 h-4" />,
-      accent: 'text-gold',
-      tag: 'MASTER / GUILD',
-      desc: 'Gestión de desafíos, auditoría de IA y calificaciones.'
-    },
-    admin: {
-      label: 'Admin',
-      icon: <ShieldCheck className="w-4 h-4" />,
-      accent: 'text-brand',
-      tag: 'ROOT ACCESS',
-      desc: 'Gobernanza de IA, logs y métricas globales.'
-    }
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const found = validate();
+    setErrors(found);
+    if (Object.keys(found).length > 0) return;
+
+    // El backend todavía no existe: la demora simula el viaje de ida y vuelta
+    // para que el estado de carga sea visible.
+    setSubmitting(true);
+    window.setTimeout(() => navigate('/my-courses'), 600);
+  };
+
+  const closeRecovery = () => {
+    setRecoveryOpen(false);
+    setRecoverySent(false);
+    setRecoveryEmail('');
   };
 
   return (
     <div className="flex flex-1 w-full items-center justify-center p-4 bg-canvas font-mono">
       <div className="w-full max-w-6xl z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
         {/* Formulario (Columna Izquierda) */}
-        <ArcadeCard variant="cyan" className="lg:col-span-6 flex flex-col justify-between p-5 sm:p-6">
+        <ArcadeCard
+          variant={active.tone}
+          padding="none"
+          className="lg:col-span-6 flex flex-col justify-between p-5 sm:p-6"
+        >
           <div>
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center justify-between gap-3 mb-4">
               <h1 className="font-['Press_Start_2P',monospace] text-base sm:text-lg text-brand-2 tracking-wider">
-                Bienvenida
+                Bienvenido/a
               </h1>
-              <span className="text-[9px] font-['Press_Start_2P',monospace] text-brand-2 border border-brand-2/40 bg-brand-2/40 px-1.5 py-0.5 rounded">
+              <ArcadeBadge tone="cyan" appearance="outline" size="sm">
                 INSERT COIN
-              </span>
+              </ArcadeBadge>
             </div>
 
             {/* Selector de Rol */}
             <div className="mb-4">
-              <label className="block font-['Press_Start_2P',monospace] text-[10px] text-ink-soft mb-1.5">
-                Seleccioná tu Rol
-              </label>
               <ArcadeRadioGroup
                 name="role"
+                label="Seleccioná tu Rol"
                 value={role}
-                onChange={(value) => setRole(value as UserRole)}
+                onChange={(value) => {
+                  setRole(value as UserRole);
+                  // El identificador cambia de formato según el rol, así que un
+                  // error de validación previo ya no aplica.
+                  setErrors({});
+                }}
                 options={(['student', 'teacher', 'admin'] as UserRole[]).map((r) => ({
                   value: r,
                   label: roleConfig[r].label,
@@ -90,20 +160,24 @@ export const LoginView: React.FC = () => {
                 }))}
               />
               <div className="mt-2">
-                <ArcadeBadge tone="cyan" appearance="outline" size="sm" icon={roleConfig[role].icon}>
-                  {roleConfig[role].tag}
+                <ArcadeBadge tone={active.tone} appearance="outline" size="sm" icon={active.icon}>
+                  {active.tag}
                 </ArcadeBadge>
               </div>
             </div>
 
-            <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+            <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-3">
               <ArcadeInput
                 id="username"
-                label={role === 'student' ? 'Usuario o Legajo' : 'Correo Institucional / Usuario'}
-                placeholder={role === 'student' ? 'Ej: 412349 o gamer_tag' : 'docente@frt.utn.edu.ar'}
+                label={active.identifierLabel}
+                placeholder={active.identifierPlaceholder}
+                autoComplete={active.identifierAutoComplete}
                 value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                required
+                error={errors.username}
+                onChange={(e) => {
+                  setUsername(e.target.value);
+                  if (errors.username) setErrors((prev) => ({ ...prev, username: undefined }));
+                }}
               />
 
               <ArcadeInput
@@ -111,13 +185,17 @@ export const LoginView: React.FC = () => {
                 label="Contraseña"
                 type="password"
                 placeholder="••••••••"
+                autoComplete="current-password"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
+                error={errors.password}
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  if (errors.password) setErrors((prev) => ({ ...prev, password: undefined }));
+                }}
               />
 
               {/* Recordarme y Olvidó contraseña */}
-              <div className="flex items-center justify-between text-[11px] text-ink-soft pt-0.5">
+              <div className="flex items-center justify-between gap-3 text-[11px] text-ink-soft pt-0.5">
                 <ArcadeCheckbox
                   label="Recordarme"
                   checked={rememberMe}
@@ -136,8 +214,21 @@ export const LoginView: React.FC = () => {
 
               {/* Botón principal */}
               <div className="pt-2 flex flex-col gap-2.5 items-center">
-                <ArcadeButton type="submit" variant="magenta" size="sm" className="w-full">
-                  Iniciar sesión
+                <ArcadeButton
+                  type="submit"
+                  variant={active.tone === 'cyan' ? 'magenta' : active.tone}
+                  size="sm"
+                  className="w-full"
+                  disabled={submitting}
+                >
+                  {submitting ? (
+                    <>
+                      <ArcadeSpinner size="sm" label="Verificando credenciales" />
+                      <span>Entrando…</span>
+                    </>
+                  ) : (
+                    <span>Iniciar sesión</span>
+                  )}
                 </ArcadeButton>
 
                 {/* Acceso a registro / primer ingreso */}
@@ -146,7 +237,7 @@ export const LoginView: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => setRegisterOpen(true)}
-                    className="text-brand-2 hover:text-brand-2 font-bold underline flex items-center gap-1 cursor-pointer"
+                    className="text-brand-2 hover:text-ink font-bold underline flex items-center gap-1 cursor-pointer transition-colors"
                   >
                     <UserPlus className="w-3 h-3" />
                     <span>Registrate acá</span>
@@ -219,20 +310,25 @@ export const LoginView: React.FC = () => {
 
       <ArcadeModal
         open={recoveryOpen}
-        onClose={() => {
-          setRecoveryOpen(false);
-          setRecoverySent(false);
-        }}
+        onClose={closeRecovery}
         title="Recuperar contraseña"
-        subtitle="Te enviamos un enlace de restablecimiento a tu correo institucional."
+        subtitle={
+          recoverySent
+            ? 'Listo, ya salió el correo.'
+            : 'Decinos a qué correo institucional te mandamos el enlace.'
+        }
         tone="cyan"
         size="sm"
         footer={
-          !recoverySent && (
+          recoverySent ? (
+            <ArcadeButton variant="cyan" size="sm" onClick={closeRecovery}>
+              Entendido
+            </ArcadeButton>
+          ) : (
             <ArcadeButton
               variant="cyan"
               size="sm"
-              disabled={recoveryEmail.trim() === ''}
+              disabled={!recoveryEmail.includes('@')}
               onClick={() => setRecoverySent(true)}
             >
               Enviar enlace
@@ -248,6 +344,7 @@ export const LoginView: React.FC = () => {
           <ArcadeInput
             label="Correo institucional"
             type="email"
+            autoComplete="email"
             placeholder="usuario@frt.utn.edu.ar"
             value={recoveryEmail}
             onChange={(e) => setRecoveryEmail(e.target.value)}
