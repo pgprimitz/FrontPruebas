@@ -140,9 +140,7 @@ export const NotificationsView: React.FC = () => {
   const readCount = notifications.filter(n => n.read).length;
 
   return (
-    <div className="min-h-screen w-full bg-canvas text-ink font-mono relative overflow-hidden">
-      <div className="crt-overlay absolute inset-0 pointer-events-none z-50" />
-
+    <div className="flex flex-1 flex-col w-full bg-canvas text-ink font-mono">
       <ArcadeNavbar
         unreadMessages={2}
         unreadNotifications={notifications.filter(n => !n.read).length}

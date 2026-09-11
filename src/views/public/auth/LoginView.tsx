@@ -60,10 +60,7 @@ export const LoginView: React.FC = () => {
   };
 
   return (
-    <div className="min-h-[85vh] w-full flex items-center justify-center p-4 relative overflow-hidden bg-canvas font-mono">
-      {/* Scanline CRT overlay */}
-      <div className="crt-overlay absolute inset-0 z-50 pointer-events-none" />
-
+    <div className="flex flex-1 w-full items-center justify-center p-4 bg-canvas font-mono">
       <div className="w-full max-w-6xl z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
         {/* Formulario (Columna Izquierda) */}
         <ArcadeCard variant="cyan" className="lg:col-span-6 flex flex-col justify-between p-5 sm:p-6">

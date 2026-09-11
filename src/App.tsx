@@ -11,11 +11,20 @@ import { Footer, ThemeProvider } from 'tup-arcade-ui';
 /**
  * Every screen shares the same vertical shell: the view fills the available
  * height and the footer always sits at the bottom, so no route can forget it.
+ *
+ * Views must NOT set their own `min-h-screen` — the shell already guarantees a
+ * full-viewport page, and a second one would stack into `100vh + footer` and
+ * push the footer below the fold behind a band of dead space.
+ *
+ * The CRT scanline overlay lives here too, and is `fixed` rather than
+ * `absolute`: anchored to a view root that outgrows the viewport, the effect
+ * stopped partway down the page instead of covering it.
  */
 function PageLayout({ children }: { children: ReactNode }) {
   return (
-    <div className="flex min-h-screen flex-col">
-      <div className="flex-1">{children}</div>
+    <div className="flex min-h-screen flex-col bg-canvas">
+      <div className="crt-overlay pointer-events-none fixed inset-0 z-50" />
+      <div className="flex flex-1 flex-col">{children}</div>
       <Footer />
     </div>
   );

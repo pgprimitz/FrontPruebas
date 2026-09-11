@@ -119,9 +119,7 @@ export const MessagingView: React.FC = () => {
   );
 
   return (
-    <div className="min-h-screen w-full bg-canvas text-ink font-mono relative overflow-hidden flex flex-col">
-      <div className="crt-overlay absolute inset-0 pointer-events-none z-50" />
-
+    <div className="flex flex-1 flex-col w-full bg-canvas text-ink font-mono">
       <ArcadeNavbar
         unreadMessages={0}
         unreadNotifications={3}
@@ -135,9 +133,11 @@ export const MessagingView: React.FC = () => {
         <Breadcrumb items={[{ label: 'Mensajería' }]} onHome={() => navigate('/my-courses')} />
       </div>
 
-      <div className="flex-1 w-full p-4 sm:p-6 grid grid-cols-1 md:grid-cols-12 gap-4 h-[calc(100vh-116px)]">
+      {/* `min-h-0` is what lets the inner panels scroll: without it a flex child
+          refuses to shrink below its content and the scroll escapes to the page. */}
+      <div className="flex-1 min-h-0 w-full p-4 sm:p-6 grid grid-cols-1 md:grid-cols-12 gap-4 md:h-[70vh]">
         {/* Contactos / Canales */}
-        <ArcadeCard variant="cyan" className="md:col-span-4 lg:col-span-4 p-0 flex flex-col overflow-hidden">
+        <ArcadeCard variant="cyan" padding="none" className="md:col-span-4 lg:col-span-4 flex flex-col overflow-hidden min-h-0">
           <div className="p-3 border-b border-surface-2 flex items-center justify-between gap-2">
             <div className="flex items-center gap-2">
               <ArcadeButton
@@ -214,7 +214,7 @@ export const MessagingView: React.FC = () => {
         </ArcadeCard>
 
         {/* Ventana de Chat Activo */}
-        <ArcadeCard variant="magenta" className="md:col-span-8 lg:col-span-8 p-0 flex flex-col overflow-hidden">
+        <ArcadeCard variant="magenta" padding="none" className="md:col-span-8 lg:col-span-8 flex flex-col overflow-hidden min-h-0">
           {/* Header del Chat */}
           <div className="p-3.5 border-b border-surface-2 bg-canvas/60 flex items-center justify-between">
             <div className="flex items-center gap-3">

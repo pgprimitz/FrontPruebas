@@ -110,10 +110,7 @@ export const MyCoursesView: React.FC<MyCoursesViewProps> = ({
   };
 
   return (
-    <div className="min-h-screen w-full bg-canvas text-ink font-mono relative overflow-hidden">
-      {/* Scanlines */}
-      <div className="crt-overlay absolute inset-0 pointer-events-none z-50" />
-
+    <div className="flex flex-1 flex-col w-full bg-canvas text-ink font-mono">
       {/* Navbar */}
       <ArcadeNavbar
         user={{
@@ -168,7 +165,8 @@ export const MyCoursesView: React.FC<MyCoursesViewProps> = ({
               <ArcadeCard
                 key={c.id}
                 variant={c.id === 'progra-4' ? 'cyan' : 'magenta'}
-                className="p-0 overflow-hidden flex flex-col bg-surface"
+                padding="none"
+                className="overflow-hidden flex flex-col bg-surface"
               >
                 {/* 45% Superior distintiva */}
                 <div className={`h-28 w-full relative ${c.headerGradient} px-5 py-4 flex flex-col justify-between border-b border-surface-2`}>

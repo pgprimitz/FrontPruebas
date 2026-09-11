@@ -909,9 +909,7 @@ export const SimplifiedCourseView: React.FC<SimplifiedCourseViewProps> = ({
   };
 
   return (
-    <div className="min-h-screen w-full bg-canvas text-ink font-mono relative overflow-hidden">
-      <div className="crt-overlay absolute inset-0 pointer-events-none z-50" />
-
+    <div className="flex flex-1 flex-col w-full bg-canvas text-ink font-mono">
       <ArcadeNavbar
         user={{ name: 'Tamara', role: 'Estudiante • Lvl 12' }}
         unreadMessages={2}
@@ -1332,7 +1330,7 @@ export const SimplifiedCourseView: React.FC<SimplifiedCourseViewProps> = ({
                 <p className="text-xs text-ink-soft mt-1">Canal público con docentes y compañeros de cursada.</p>
               </div>
 
-              <ArcadeCard variant="magenta" className="p-0 flex flex-col h-[480px] overflow-hidden">
+              <ArcadeCard variant="magenta" padding="none" className="flex flex-col h-[480px] overflow-hidden">
                 <div className="p-3 bg-canvas/80 border-b border-surface-2 flex items-center justify-between">
                   <span className="text-xs text-ink-soft font-bold"># general-programacion-4</span>
                   <ArcadeBadge tone="green" appearance="outline" size="sm">

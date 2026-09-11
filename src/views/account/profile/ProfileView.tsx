@@ -155,9 +155,7 @@ export const ProfileView: React.FC = () => {
   ];
 
   return (
-    <div className="min-h-screen w-full bg-canvas text-ink font-mono relative overflow-hidden">
-      <div className="crt-overlay absolute inset-0 pointer-events-none z-50" />
-
+    <div className="flex flex-1 flex-col w-full bg-canvas text-ink font-mono">
       <ArcadeNavbar
         user={{ name: 'Tamara', role: 'Estudiante • Lvl 12' }}
         unreadMessages={2}
@@ -245,7 +243,7 @@ export const ProfileView: React.FC = () => {
         </ArcadeCard>
 
         {/* Historial completo de la plataforma */}
-        <ArcadeCard variant="default" className="p-0 overflow-hidden">
+        <ArcadeCard variant="default" padding="none" className="overflow-hidden">
           <div className="p-4 flex items-center justify-between border-b border-surface-2 bg-surface/60">
             <div className="flex items-center gap-2">
               <Clock className="w-4 h-4 text-brand-2" />
