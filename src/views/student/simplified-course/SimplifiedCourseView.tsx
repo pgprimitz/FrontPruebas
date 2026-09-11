@@ -7,7 +7,6 @@ import {
   ArcadeBadge,
   ArcadeInput,
   ArcadeModal,
-  ArcadeTabs,
   ArcadeTable,
   ArcadePagination,
   ArcadeAvatar,
@@ -19,8 +18,6 @@ import {
   CodeBlock,
   MathBlock,
   LessonHeader,
-  LessonStepper,
-  CourseOutline,
   CountdownTimer,
   MultipleChoice,
   RubricPanel,
@@ -52,9 +49,7 @@ import type {
   ActivityStatus,
   ArcadeTableColumn,
   ChoiceOption,
-  CourseOutlineNode,
   EarnedBadge,
-  ResourceType,
   RubricCriterion,
 } from 'tup-arcade-ui';
 import {
@@ -158,14 +153,54 @@ const activityKindLabels: Partial<Record<ActivityKind, string>> = {
   peer: 'Entre pares',
 };
 
-const resourceTypeToKind: Record<ResourceItem['type'], ResourceType | 'quiz'> = {
-  pdf: 'document',
-  video: 'video',
-  audio: 'audio',
-  link: 'link',
-  text: 'page',
-  challenge: 'quiz',
-};
+/** Top-level sections of the course, in sidebar order. */
+const sidebarSections: {
+  key: SidebarTab;
+  label: string;
+  hint?: string;
+  icon: React.ReactNode;
+  activeClass: string;
+}[] = [
+  {
+    key: 'roadmap',
+    label: 'Roadmap (por defecto)',
+    icon: <Map className="w-4 h-4 text-brand-2" />,
+    activeClass: 'bg-brand-2/20 border border-brand-2 text-brand-2 font-bold shadow-[0_0_8px_rgba(6,182,212,0.25)]',
+  },
+  {
+    key: 'ranking',
+    label: 'Ranking',
+    icon: <PixelTrophy className="w-4 h-4" />,
+    activeClass: 'bg-gold/20 border border-gold text-gold font-bold shadow-[0_0_8px_rgba(251,191,36,0.25)]',
+  },
+  {
+    key: 'shop',
+    label: 'Mercado de Canje',
+    icon: <PixelChest className="w-4 h-4" />,
+    activeClass: 'bg-success/20 border border-success text-success font-bold shadow-[0_0_8px_rgba(52,211,153,0.25)]',
+  },
+  {
+    key: 'chat',
+    label: 'Chat de Cohorte',
+    icon: <PixelChat className="w-4 h-4" />,
+    activeClass: 'bg-brand/20 border border-brand text-brand font-bold shadow-[0_0_8px_rgba(217,70,239,0.25)]',
+  },
+  {
+    key: 'profile',
+    label: 'Perfil de cursos',
+    hint: 'Info y actividades',
+    icon: <PixelUser className="w-4 h-4" />,
+    activeClass: 'bg-brand/20 border border-brand text-brand font-bold shadow-[0_0_8px_rgba(129,140,248,0.25)]',
+  },
+];
+
+/** Resource categories of an open unit, in sidebar order. */
+const unitCategories: { key: UnitCategory; label: string; icon: React.ReactNode }[] = [
+  { key: 'theoretical', label: 'Material Teórico', icon: <PixelPdf className="w-4 h-4" /> },
+  { key: 'audiovisual', label: 'Recursos Audiovisuales', icon: <PixelVideo className="w-4 h-4" /> },
+  { key: 'support', label: 'Material de Apoyo', icon: <PixelScroll className="w-4 h-4" /> },
+  { key: 'challenges', label: 'Desafíos', icon: <PixelQuiz className="w-4 h-4" /> },
+];
 
 const resourceIcon = (type: ResourceItem['type']) => {
   switch (type) {
@@ -215,7 +250,14 @@ export const SimplifiedCourseView: React.FC<SimplifiedCourseViewProps> = ({
     { label: 'Cursos', onClick: onBackToCourses },
     { label: 'Programación IV', onClick: activeTab !== 'roadmap' || selectedUnit ? goToCourseRoot : undefined },
     ...(activeTab !== 'roadmap' ? [{ label: tabLabels[activeTab] }] : []),
-    ...(activeTab === 'roadmap' && selectedUnit ? [{ label: selectedUnit.name }] : []),
+    // Dentro de una unidad el trail llega hasta la categoría abierta, que es el
+    // nivel más profundo que el sidebar puede seleccionar.
+    ...(activeTab === 'roadmap' && selectedUnit
+      ? [
+          { label: selectedUnit.name, onClick: () => setActiveCategory('theoretical') },
+          { label: unitCategories.find((c) => c.key === activeCategory)?.label ?? '' },
+        ]
+      : []),
   ];
 
   // Datos de unidades
@@ -795,61 +837,6 @@ export const SimplifiedCourseView: React.FC<SimplifiedCourseViewProps> = ({
     { id: 'cb4', name: 'Guardián de Rutas', description: 'Bloqueado: completá el Desafío 3.', earned: false },
   ];
 
-  // Árbol de recursos de la unidad abierta, para el índice lateral.
-  const outlineNodes: CourseOutlineNode[] = selectedUnit
-    ? [
-        {
-          id: 'theoretical',
-          label: 'Material Teórico',
-          children: selectedUnit.resources.theoretical.map((r) => ({
-            id: r.id,
-            label: r.title,
-            status: statusOf(r),
-            kind: resourceTypeToKind[r.type],
-          })),
-        },
-        {
-          id: 'audiovisual',
-          label: 'Recursos Audiovisuales',
-          children: selectedUnit.resources.audiovisual.map((r) => ({
-            id: r.id,
-            label: r.title,
-            status: statusOf(r),
-            kind: resourceTypeToKind[r.type],
-          })),
-        },
-        {
-          id: 'support',
-          label: 'Material de Apoyo',
-          children: selectedUnit.resources.supportMaterial.map((r) => ({
-            id: r.id,
-            label: r.title,
-            status: statusOf(r),
-            kind: resourceTypeToKind[r.type],
-          })),
-        },
-        {
-          id: 'challenges',
-          label: 'Desafíos',
-          children: selectedUnit.resources.challenges.map((r) => ({
-            id: r.id,
-            label: r.title,
-            status: statusOf(r),
-            kind: resourceTypeToKind[r.type],
-          })),
-        },
-      ]
-    : [];
-
-  const allUnitResources = selectedUnit
-    ? [
-        ...selectedUnit.resources.theoretical,
-        ...selectedUnit.resources.audiovisual,
-        ...selectedUnit.resources.supportMaterial,
-        ...selectedUnit.resources.challenges,
-      ]
-    : [];
-
   const categoryTitles: Record<UnitCategory, string> = {
     theoretical: 'MATERIAL TEÓRICO (PDF / DOCUMENTOS)',
     audiovisual: 'RECURSOS AUDIOVISUALES (VIDEOS / CLASES)',
@@ -959,9 +946,13 @@ export const SimplifiedCourseView: React.FC<SimplifiedCourseViewProps> = ({
       {/* Layout Sidebar + Contenido */}
       <div className="w-full px-4 sm:px-8 py-6 grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* Sidebar Lateral */}
-        <aside className="lg:col-span-3 flex flex-col gap-4">
+        {/* El sidebar es la navegación principal del curso. Cuando hay una unidad
+            abierta se transforma en el índice de sus 4 categorías de recursos, y
+            elegir una categoría SOLO filtra la lista del panel central: nunca
+            abre un recurso por su cuenta. */}
+        <aside className="lg:col-span-3 flex flex-col gap-2">
           {selectedUnit ? (
-            <ArcadeCard variant="cyan" className="flex flex-col gap-3">
+            <ArcadeCard variant="cyan" padding="sm" className="flex flex-col gap-2">
               <ArcadeButton variant="cyan" size="sm" onClick={() => setSelectedUnit(null)}>
                 <ArrowLeft className="w-3.5 h-3.5" />
                 <span>Volver al Roadmap</span>
@@ -971,65 +962,65 @@ export const SimplifiedCourseView: React.FC<SimplifiedCourseViewProps> = ({
                 <p className="font-['Press_Start_2P',monospace] text-[10px] text-brand-2 truncate">
                   {selectedUnit.name}: {selectedUnit.title.split(':')[1] || selectedUnit.title}
                 </p>
-                <p className="text-[10px] text-ink-soft mt-1">Índice de la unidad:</p>
+                <p className="text-[10px] text-ink-soft mt-1">Navegación de recursos:</p>
               </div>
 
-              <CourseOutline
-                nodes={outlineNodes}
-                activeId={activeCategory}
-                iconFor={(node) => {
-                  const resource = allUnitResources.find((r) => r.id === node.id);
-                  return resource ? resourceIcon(resource.type) : undefined;
-                }}
-                onSelect={(node) => {
-                  const parent = outlineNodes.find((section) =>
-                    section.children?.some((child) => child.id === node.id),
-                  );
-                  const category = (parent?.id ?? node.id) as UnitCategory;
-                  setActiveCategory(category);
-                  const resource = allUnitResources.find((r) => r.id === node.id);
-                  if (resource) handleOpenResource(resource);
-                }}
-              />
+              {unitCategories.map((item) => (
+                <button
+                  key={item.key}
+                  type="button"
+                  onClick={() => setActiveCategory(item.key)}
+                  className={`w-full flex items-center justify-between px-3 py-2.5 rounded text-left transition-all cursor-pointer ${
+                    activeCategory === item.key
+                      ? 'bg-brand-2/20 border border-brand-2 text-brand-2 font-bold shadow-[0_0_8px_rgba(6,182,212,0.25)]'
+                      : 'text-ink-soft hover:bg-surface-2/80 hover:text-ink border border-transparent'
+                  }`}
+                >
+                  <div className="flex items-center gap-2.5">
+                    {item.icon}
+                    <span className="text-xs">{item.label}</span>
+                  </div>
+                  <ArcadeBadge tone="neutral" appearance="outline" size="sm">
+                    {resourcesFor(item.key).length}
+                  </ArcadeBadge>
+                </button>
+              ))}
             </ArcadeCard>
           ) : (
-            <ArcadeCard variant="default" className="flex flex-col gap-3">
-              <span className="font-['Press_Start_2P',monospace] text-[10px] text-ink-soft px-1">
-                PROGRESO DEL CURSO
+            <ArcadeCard variant="default" padding="sm" className="flex flex-col gap-1.5">
+              <span className="font-['Press_Start_2P',monospace] text-[10px] text-ink-soft px-2 py-1 mb-1">
+                MENU LATERAL
               </span>
-              <LessonStepper
-                orientation="vertical"
-                steps={units.map((u) => ({ id: u.id, label: u.title, locked: u.progress === 0 }))}
-                currentIndex={units.findIndex((u) => u.progress < 100)}
-                onStepClick={(step) => {
-                  const unit = units.find((u) => u.id === step.id);
-                  if (unit) {
-                    setSelectedUnit(unit);
-                    setActiveCategory('theoretical');
-                  }
-                }}
-              />
+
+              {sidebarSections.map((section) => (
+                <button
+                  key={section.key}
+                  type="button"
+                  onClick={() => {
+                    setActiveTab(section.key);
+                    if (section.key === 'roadmap') setSelectedUnit(null);
+                  }}
+                  className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded text-left transition-all cursor-pointer ${
+                    activeTab === section.key
+                      ? section.activeClass
+                      : 'text-ink-soft hover:bg-surface-2/80 hover:text-ink border border-transparent'
+                  }`}
+                >
+                  {section.icon}
+                  <div className="flex flex-col text-left">
+                    <span className="text-xs font-bold">{section.label}</span>
+                    {section.hint && (
+                      <span className="text-[9px] text-ink-soft">{section.hint}</span>
+                    )}
+                  </div>
+                </button>
+              ))}
             </ArcadeCard>
           )}
         </aside>
 
         {/* Área Central Principal */}
         <main className="lg:col-span-9 flex flex-col gap-6">
-          <ArcadeTabs
-            activeId={activeTab}
-            onChange={(id) => {
-              setActiveTab(id as SidebarTab);
-              if (id !== 'roadmap') setSelectedUnit(null);
-            }}
-            tabs={[
-              { id: 'roadmap', label: 'Roadmap', icon: <Map className="w-4 h-4" /> },
-              { id: 'ranking', label: 'Ranking', icon: <PixelTrophy className="w-4 h-4" /> },
-              { id: 'shop', label: 'Mercado', icon: <PixelChest className="w-4 h-4" /> },
-              { id: 'chat', label: 'Chat', icon: <PixelChat className="w-4 h-4" />, badge: chatMessages.length },
-              { id: 'profile', label: 'Perfil', icon: <PixelUser className="w-4 h-4" /> },
-            ]}
-          />
-
           {/* TAB 1: ROADMAP (Lista de Unidades o Detalle de Unidad) */}
           {activeTab === 'roadmap' && !selectedUnit && (
             <div className="flex flex-col gap-5">
