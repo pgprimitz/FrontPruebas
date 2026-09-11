@@ -158,7 +158,7 @@ export const NotificationsView: React.FC = () => {
             <ArcadeButton
               variant="cyan"
               size="sm"
-              onClick={() => navigate(-1)}
+              onClick={() => navigate("/my-courses")}
               aria-label="Volver"
             >
               <ArrowLeft className="w-4 h-4" />

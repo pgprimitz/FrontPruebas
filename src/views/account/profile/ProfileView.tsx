@@ -162,7 +162,7 @@ export const ProfileView: React.FC = () => {
         unreadNotifications={4}
         onNavigateMessages={() => navigate('/messages')}
         onNavigateNotifications={() => navigate('/notifications')}
-        onEditProfile={() => setEditOpen(true)}
+        onEditProfile={() => navigate("/profile")}
         onLogout={() => navigate('/login')}
       />
 
