@@ -5,7 +5,7 @@ import {
   ArcadeButton,
   ArcadeInput,
   ArcadeCheckbox,
-  ArcadeTabs,
+  ArcadeRadioGroup,
   ArcadeBadge,
   ArcadeModal,
   Callout,
@@ -82,20 +82,20 @@ export const LoginView: React.FC = () => {
               <label className="block font-['Press_Start_2P',monospace] text-[10px] text-ink-soft mb-1.5">
                 Seleccioná tu Rol
               </label>
-              <ArcadeTabs
-                tabs={(['student', 'teacher', 'admin'] as UserRole[]).map((r) => ({
-                  id: r,
+              <ArcadeRadioGroup
+                name="role"
+                value={role}
+                onChange={(value) => setRole(value as UserRole)}
+                options={(['student', 'teacher', 'admin'] as UserRole[]).map((r) => ({
+                  value: r,
                   label: roleConfig[r].label,
-                  icon: roleConfig[r].icon,
+                  description: roleConfig[r].desc,
                 }))}
-                activeId={role}
-                onChange={(id) => setRole(id as UserRole)}
               />
-              <div className="mt-2 flex flex-col gap-1">
-                <ArcadeBadge tone="cyan" appearance="outline" size="sm">
+              <div className="mt-2">
+                <ArcadeBadge tone="cyan" appearance="outline" size="sm" icon={roleConfig[role].icon}>
                   {roleConfig[role].tag}
                 </ArcadeBadge>
-                <p className="text-[11px] text-ink-soft">{roleConfig[role].desc}</p>
               </div>
             </div>
 

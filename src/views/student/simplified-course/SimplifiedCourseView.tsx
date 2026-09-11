@@ -40,6 +40,8 @@ import {
   PixelUser,
   PixelPdf,
   PixelVideo,
+  PixelAudio,
+  PixelLink,
   PixelScroll,
   PixelQuiz,
   PixelCoin,
@@ -97,7 +99,7 @@ export interface QuizQuestion {
 
 export interface ResourceItem {
   id: string;
-  type: 'pdf' | 'video' | 'text' | 'challenge';
+  type: 'pdf' | 'video' | 'audio' | 'link' | 'text' | 'challenge';
   title: string;
   durationOrSize?: string;
   completed?: boolean;
@@ -159,6 +161,8 @@ const activityKindLabels: Partial<Record<ActivityKind, string>> = {
 const resourceTypeToKind: Record<ResourceItem['type'], ResourceType | 'quiz'> = {
   pdf: 'document',
   video: 'video',
+  audio: 'audio',
+  link: 'link',
   text: 'page',
   challenge: 'quiz',
 };
@@ -169,6 +173,10 @@ const resourceIcon = (type: ResourceItem['type']) => {
       return <PixelPdf className="w-4 h-4" />;
     case 'video':
       return <PixelVideo className="w-4 h-4" />;
+    case 'audio':
+      return <PixelAudio className="w-4 h-4" />;
+    case 'link':
+      return <PixelLink className="w-4 h-4" />;
     case 'challenge':
       return <PixelQuiz className="w-4 h-4" />;
     case 'text':
@@ -176,6 +184,9 @@ const resourceIcon = (type: ResourceItem['type']) => {
       return <PixelScroll className="w-4 h-4" />;
   }
 };
+
+/** Resources played in the built-in media modal rather than downloaded. */
+const isPlayable = (type: ResourceItem['type']) => type === 'video' || type === 'audio';
 
 export const SimplifiedCourseView: React.FC<SimplifiedCourseViewProps> = ({
   onBackToCourses,
@@ -223,6 +234,7 @@ export const SimplifiedCourseView: React.FC<SimplifiedCourseViewProps> = ({
         audiovisual: [
           { id: 'v1', type: 'video', title: 'Masterclass: Despliegue de Single Page Apps en Vercel & Docker', durationOrSize: '42 min', completed: true, kind: 'optional', estimatedMinutes: 42, description: 'Video explicativo paso a paso con terminal en vivo.' },
           { id: 'v2', type: 'video', title: 'Patrón Adapter y Ports en Backend .NET', durationOrSize: '28 min', completed: true, kind: 'optional', estimatedMinutes: 28, description: 'Demostración práctica de desacoplamiento.' },
+          { id: 'v5', type: 'audio', title: 'Repaso en audio: glosario de arquitectura', durationOrSize: '18 min', completed: false, kind: 'optional', estimatedMinutes: 18, description: 'Versión escuchable del glosario, pensada para repasar en el colectivo.' },
         ],
         supportMaterial: [
           {
@@ -360,7 +372,7 @@ export const SimplifiedCourseView: React.FC<SimplifiedCourseViewProps> = ({
               },
             ],
           },
-          { id: 's2', type: 'text', title: 'Repositorio Template de Microfrontends (GitHub)', durationOrSize: 'Enlace Web', completed: true, kind: 'optional', description: 'Repo base para clonar y comenzar los desafíos de cátedra.' },
+          { id: 's2', type: 'link', title: 'Repositorio Template de Microfrontends (GitHub)', durationOrSize: 'Enlace Web', completed: true, kind: 'optional', description: 'Repo base para clonar y comenzar los desafíos de cátedra.' },
         ],
         challenges: [
           {
@@ -447,7 +459,7 @@ export const SimplifiedCourseView: React.FC<SimplifiedCourseViewProps> = ({
           { id: 'v3', type: 'video', title: 'Construyendo un Design System Pixel-Art con Tailwind', durationOrSize: '35 min', completed: true, kind: 'optional', estimatedMinutes: 35, description: 'Técnicas de sombreado beveled y fuentes monospace.' },
         ],
         supportMaterial: [
-          { id: 's3', type: 'text', title: 'Documentación interactiva NES.css y Sprites', durationOrSize: 'Enlace Web', completed: false, kind: 'optional', description: 'Catálogo de iconos e inputs estilo retro gaming.' },
+          { id: 's3', type: 'link', title: 'Documentación interactiva NES.css y Sprites', durationOrSize: 'Enlace Web', completed: false, kind: 'optional', description: 'Catálogo de iconos e inputs estilo retro gaming.' },
         ],
         challenges: [
           {
@@ -540,7 +552,7 @@ export const SimplifiedCourseView: React.FC<SimplifiedCourseViewProps> = ({
       setReaderItem(item);
       return;
     }
-    if (item.type === 'video') {
+    if (isPlayable(item.type)) {
       setVideoItem(item);
       return;
     }
@@ -1146,7 +1158,7 @@ export const SimplifiedCourseView: React.FC<SimplifiedCourseViewProps> = ({
                                 <span>{readMap[item.id] ? 'Hecho' : 'Marcar como Hecho'}</span>
                               </ArcadeButton>
                               <ArcadeButton variant="yellow" size="sm" onClick={() => handleOpenResource(item)}>
-                                {item.type === 'video' ? (
+                                {isPlayable(item.type) || item.type === 'link' ? (
                                   <ExternalLink className="w-3.5 h-3.5" />
                                 ) : item.blocks ? (
                                   <BookOpen className="w-3.5 h-3.5" />
@@ -1154,7 +1166,13 @@ export const SimplifiedCourseView: React.FC<SimplifiedCourseViewProps> = ({
                                   <Download className="w-3.5 h-3.5" />
                                 )}
                                 <span>
-                                  {item.type === 'video' ? 'Ver' : item.blocks ? 'Leer' : 'Abrir'}
+                                  {isPlayable(item.type)
+                                    ? 'Reproducir'
+                                    : item.type === 'link'
+                                    ? 'Explorar'
+                                    : item.blocks
+                                    ? 'Leer'
+                                    : 'Abrir'}
                                 </span>
                               </ArcadeButton>
                             </>
@@ -1514,12 +1532,13 @@ export const SimplifiedCourseView: React.FC<SimplifiedCourseViewProps> = ({
               setVideoItem(null);
             }}
           >
-            Marcar como vista
+            {videoItem?.type === 'audio' ? 'Marcar como escuchada' : 'Marcar como vista'}
           </ArcadeButton>
         }
       >
         <div className="flex flex-col items-center justify-center gap-3 py-10">
           <ArcadeSpinner size="lg" label="Cargando el reproductor" />
+          {videoItem && resourceIcon(videoItem.type)}
           <p className="text-xs text-ink-soft">
             El reproductor se sirve desde el campus de la facultad. Duración: {videoItem?.durationOrSize}.
           </p>
