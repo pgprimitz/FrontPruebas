@@ -1,0 +1,186 @@
+:host {
+  display: flex;
+  height: 100%;
+  max-height: 100%;
+  flex-direction: column;
+  overflow: hidden;
+  min-width: 0;
+}
+
+.bar {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  min-width: 0;
+  padding: 0.45rem 1rem;
+  border-bottom: 2px solid var(--border-subtle);
+  background: var(--bg-surface);
+}
+
+.brand,
+.actions,
+.user {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  min-width: 0;
+}
+
+.brand {
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  padding: 0;
+  flex-shrink: 1;
+}
+
+.brand-copy {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  line-height: 1.1;
+  min-width: 0;
+}
+
+.user strong {
+  font-family: var(--font-arcade);
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
+.icon-btn {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  border: 1px solid var(--border-subtle);
+  border-radius: 4px;
+  background: var(--bg-surface-alt);
+  color: inherit;
+  cursor: pointer;
+}
+
+.user {
+  position: relative;
+  flex-shrink: 0;
+  overflow: visible;
+  padding: 0.35rem 0.45rem 0.35rem 0.55rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: 4px;
+  background: var(--bg-surface-alt);
+}
+
+:host ::ng-deep .user generic-dropdown,
+:host ::ng-deep .user generic-dropdown .menu {
+  position: static;
+}
+
+:host ::ng-deep .user generic-dropdown .trigger {
+  border: 0;
+  background: transparent;
+  padding: 0.15rem;
+}
+
+:host ::ng-deep .user generic-dropdown .list {
+  left: 0;
+  right: 0;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.page-head {
+  flex-shrink: 0;
+  min-width: 0;
+  padding: 0.4rem 1rem 0.45rem;
+  border-bottom: 1px solid var(--border-subtle);
+  background: var(--bg-surface);
+}
+
+.crumbs {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-bottom: 0.15rem;
+}
+
+.crumb {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--text-muted);
+  font-family: var(--font-arcade);
+  font-size: 0.72rem;
+  cursor: pointer;
+}
+
+.crumb.current {
+  color: var(--accent-secondary);
+  cursor: default;
+}
+
+.sep {
+  color: var(--text-muted);
+  font-size: 0.72rem;
+}
+
+.main {
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+  width: 100%;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.main router-outlet {
+  display: none;
+}
+
+.main > :not(router-outlet) {
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+  width: 100%;
+  overflow: hidden;
+}
+
+@media (max-width: 720px) {
+  .bar {
+    gap: 0.45rem;
+    padding: 0.4rem 0.65rem;
+  }
+
+  .brand,
+  .actions {
+    gap: 0.35rem;
+  }
+
+  .brand-copy {
+    display: none;
+  }
+
+  .icon-btn {
+    width: 32px;
+    height: 32px;
+  }
+
+  .user {
+    padding: 0.2rem 0.3rem 0.2rem 0.4rem;
+  }
+
+  .user strong {
+    font-size: 0.78rem;
+  }
+
+  .page-head {
+    padding: 0.3rem 0.65rem 0.35rem;
+  }
+}

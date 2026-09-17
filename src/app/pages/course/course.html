@@ -1,0 +1,174 @@
+<div class="page">
+  <div class="split">
+    @if (!unit()) {
+      <aside class="rail">
+        <p class="rail-kicker">Curso</p>
+        <nav class="nav">
+          @for (tab of courseTabs; track tab.id) {
+            <button
+              type="button"
+              class="nav-btn"
+              [class.active]="courseTab() === tab.id"
+              (click)="courseTab.set(tab.id)"
+            >
+              <generic-icon [name]="tab.icon" [size]="18" />
+              <span class="nav-copy">
+                <strong>{{ tab.label }}</strong>
+                @if (!tab.owned) {
+                  <generic-text [muted]="true" size="sm">Grupo</generic-text>
+                }
+              </span>
+            </button>
+          }
+        </nav>
+      </aside>
+
+      <section class="stage">
+        @if (courseTab() === 'roadmap') {
+          <div class="unit-grid">
+            @for (item of units; track item.id) {
+              <generic-card class="unit-card" [tone]="course().tone" padding="none">
+                <div class="unit-head">
+                  <span class="unit-label">{{ item.label }}</span>
+                  @if (unitComplete(item)) {
+                    <generic-badge tone="green" appearance="solid" size="sm">Completado</generic-badge>
+                  }
+                </div>
+                <div class="unit-body">
+                  <generic-title [level]="3" [tone]="course().tone">{{ item.title }}</generic-title>
+                  <generic-text class="unit-desc" size="sm">{{ item.description }}</generic-text>
+                  <generic-progress
+                    [value]="item.progress"
+                    [max]="100"
+                    label="Avance"
+                    [showValue]="true"
+                    [tone]="course().tone"
+                  />
+                  <div class="unit-actions">
+                    <generic-button [variant]="course().tone" size="sm" (click)="openUnit(item)">
+                      Ver unidad
+                    </generic-button>
+                  </div>
+                </div>
+              </generic-card>
+            }
+          </div>
+        } @else {
+          <div class="slot">
+            <generic-badge tone="gold" appearance="outline" size="sm">Espacio de grupo</generic-badge>
+            <generic-title [level]="2" [tone]="course().tone">{{ activeTab().label }}</generic-title>
+            <generic-text>
+              El esqueleto deja este panel listo. El grupo dueño de
+              {{ activeTab().label }} reemplaza el mock con su microservicio, sin cambiar el layout 25/75.
+            </generic-text>
+          </div>
+        }
+      </section>
+    } @else {
+      <aside class="rail">
+        <button type="button" class="back-road" (click)="backToRoadmap()">
+          ← Roadmap
+        </button>
+        <p class="unit-name">{{ unit()!.label }} · {{ unit()!.title }}</p>
+        <p class="rail-kicker">Recursos</p>
+        <nav class="nav">
+          <button type="button" class="nav-btn nav-back" (click)="backToRoadmap()">
+            <generic-icon name="scroll" [size]="18" />
+            <span class="nav-copy">
+              <strong>Roadmap</strong>
+            </span>
+          </button>
+          @for (tab of unitTabs; track tab.id) {
+            <button
+              type="button"
+              class="nav-btn"
+              [class.active]="section() === tab.id"
+              (click)="section.set(tab.id)"
+            >
+              <generic-icon [name]="tab.icon" [size]="18" />
+              <span class="nav-copy">
+                <strong class="label-full">{{ tab.label }}</strong>
+                <strong class="label-short">{{ tab.short }}</strong>
+              </span>
+              @if (sectionDone(unit()!, tab.id)) {
+                <generic-icon class="nav-check" name="check" [size]="14" />
+              }
+            </button>
+          }
+        </nav>
+      </aside>
+
+      <section class="stage">
+        <div class="stage-head">
+          <generic-text [muted]="true" size="sm">
+            {{ course().title }} · {{ unit()!.label }}
+          </generic-text>
+          <div class="unit-title">
+            <generic-title [level]="2" [tone]="course().tone">
+              Unidad {{ unitNumber(unit()!) }}: {{ unit()!.title }}
+            </generic-title>
+            <div class="unit-meter">
+              @if (unitComplete(unit()!)) {
+                <generic-badge tone="green" appearance="solid" size="sm">Completado</generic-badge>
+              }
+              <generic-progress
+                [value]="unit()!.progress"
+                [max]="100"
+                [showValue]="true"
+                [tone]="course().tone"
+              />
+            </div>
+          </div>
+          <generic-text>{{ unit()!.description }}</generic-text>
+        </div>
+
+        <generic-subtitle class="section-label">{{ sectionCopy(section()).heading }}</generic-subtitle>
+        <div class="files">
+          @for (resource of visibleResources(); track resource.id) {
+            <article class="file">
+              <div class="file-copy">
+                <generic-icon [name]="section() === 'audiovisual' ? 'video' : section() === 'desafio' ? 'quiz' : 'pdf'" [size]="22" />
+                <div>
+                  <strong>{{ resource.title }}</strong>
+                  <generic-text [muted]="true" size="sm">{{ resource.subtitle }}</generic-text>
+                  <div class="file-meta">
+                    <generic-text size="sm">{{ resource.size }}</generic-text>
+                    @for (tag of resource.tags; track tag) {
+                      <generic-badge [tone]="tagTone(tag)" appearance="solid" size="sm">
+                        {{ tagLabel(tag) }}
+                      </generic-badge>
+                    }
+                  </div>
+                </div>
+              </div>
+              <div class="file-actions">
+                <generic-button variant="cyan" size="sm" (click)="toggleDone(resource)">
+                  {{ isDone(resource) ? 'Hecho' : 'Marcar como Hecho' }}
+                </generic-button>
+                <generic-button variant="gold" size="sm" (click)="preview.set(resource)">Abrir</generic-button>
+              </div>
+            </article>
+          } @empty {
+            <generic-text [muted]="true">{{ sectionCopy(section()).empty }}</generic-text>
+          }
+        </div>
+      </section>
+    }
+  </div>
+</div>
+
+<generic-modal
+  [open]="!!preview()"
+  (openChange)="!$event && preview.set(null)"
+  [title]="preview()?.title || 'Recurso'"
+  [subtitle]="preview()?.subtitle || ''"
+  tone="cyan"
+  size="md"
+>
+  <generic-text>
+    Vista mock. El grupo de contenidos cablea el visor real acá.
+  </generic-text>
+  <div footer>
+    <generic-button variant="cyan" size="sm" (click)="preview.set(null)">Cerrar</generic-button>
+  </div>
+</generic-modal>

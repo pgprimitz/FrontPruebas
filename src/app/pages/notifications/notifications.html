@@ -1,0 +1,53 @@
+<div class="page">
+  @if (unreadVisible()) {
+    <div class="heading">
+      <generic-button variant="ghost" size="sm" (click)="markAllRead()">
+        Marcar todas como leídas
+      </generic-button>
+    </div>
+  }
+
+  <div class="filters">
+    @for (chip of filters; track chip.id) {
+      <button
+        type="button"
+        class="chip"
+        [class.active]="filter() === chip.id"
+        (click)="filter.set(chip.id)"
+      >
+        {{ chip.label }}
+      </button>
+    }
+  </div>
+
+  <div class="list">
+    @for (row of visible(); track row.id) {
+      <article class="item" [class.unread]="!row.read">
+        <generic-icon [name]="iconFor(row)" [size]="22" />
+        <div class="copy">
+          <div class="top">
+            <generic-title [level]="3" [tone]="toneFor(row)">{{ row.title }}</generic-title>
+            <generic-badge [tone]="toneFor(row)" appearance="outline" size="sm">
+              {{ typeLabel(row) }}
+            </generic-badge>
+          </div>
+          <generic-text size="sm">{{ row.description }}</generic-text>
+          <div class="meta">
+            <generic-text [muted]="true" size="sm">{{ row.when }}</generic-text>
+            @if (row.type !== 'logro' && row.xp) {
+              <generic-badge tone="cyan" appearance="solid" size="sm">+{{ row.xp }} XP</generic-badge>
+            }
+            @if (row.type !== 'logro' && row.coins) {
+              <generic-badge tone="gold" appearance="solid" size="sm">+{{ row.coins }}</generic-badge>
+            }
+          </div>
+        </div>
+        @if (!row.read) {
+          <button type="button" class="mark" (click)="markRead(row.id)">Marcar como leída</button>
+        }
+      </article>
+    } @empty {
+      <generic-text [muted]="true">No hay avisos en este filtro.</generic-text>
+    }
+  </div>
+</div>

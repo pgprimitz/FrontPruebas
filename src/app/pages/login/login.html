@@ -1,0 +1,123 @@
+<div class="page">
+  <div class="stage">
+    <div class="left">
+      <generic-card tone="cyan" class="panel">
+        <div class="head">
+          <generic-title>Bienvenido/a</generic-title>
+          <generic-badge tone="cyan" size="sm">INSERT COIN</generic-badge>
+        </div>
+
+        <form class="form" (submit)="$event.preventDefault(); submit()">
+          <generic-select
+            label="Rol"
+            [options]="roleOptions"
+            [value]="role()"
+            (valueChange)="pickRole($event)"
+          />
+          <generic-input
+            [label]="identifierLabel()"
+            [placeholder]="identifierPlaceholder()"
+            [value]="username()"
+            [error]="usernameError()"
+            (valueChange)="username.set($event)"
+          />
+          <generic-input
+            label="Contraseña"
+            type="password"
+            placeholder="••••••••"
+            [value]="password()"
+            [error]="passwordError()"
+            (valueChange)="password.set($event)"
+          />
+          <div class="row">
+            <generic-checkbox
+              label="Recordarme"
+              [checked]="remember()"
+              (checkedChange)="remember.set($event)"
+            />
+            <generic-button variant="ghost" size="sm" (click)="recoveryOpen.set(true)">
+              ¿Olvidaste tu contraseña?
+            </generic-button>
+          </div>
+          <div class="submit">
+            <generic-button type="submit" variant="magenta" [disabled]="submitting()">
+              @if (submitting()) {
+                <generic-spinner size="sm" label="Entrando" />
+              }
+              Iniciar sesión
+            </generic-button>
+          </div>
+        </form>
+
+        <div class="signup">
+          <generic-text [muted]="true" size="sm">¿Aún no tenés cuenta?</generic-text>
+          <generic-button variant="ghost" size="sm" (click)="registerOpen.set(true)">
+            Registrate acá
+          </generic-button>
+        </div>
+
+        <generic-text class="edition" [muted]="true" size="sm">
+          PLATAFORMA GAMIFICADA TUP • 2026 EDITION
+        </generic-text>
+      </generic-card>
+    </div>
+
+    <div class="hero" aria-hidden="true">
+      <generic-icon class="gem g1" name="coin" [size]="28" />
+      <generic-icon class="gem g2" name="star" [size]="22" />
+      <generic-icon class="gem g3" name="chest" [size]="26" />
+      <generic-icon class="gem g4" name="medal" [size]="32" />
+      <generic-icon class="gem g5" name="trophy" [size]="24" />
+      <generic-icon class="gem g6" name="heart" [size]="20" />
+      <generic-icon class="gem g7" name="fire" [size]="24" />
+      <img class="heroes" src="login-heroes.jpg" alt="" />
+      <generic-text class="kicker">Tecnicatura Universitaria en Programación</generic-text>
+    </div>
+  </div>
+  <app-site-footer />
+</div>
+
+<generic-modal
+  [open]="recoveryOpen()"
+  (openChange)="recoveryOpen.set($event)"
+  title="Recuperar contraseña"
+  [subtitle]="recoverySent() ? 'Listo, ya salió el correo.' : 'Decinos a qué correo institucional te mandamos el enlace.'"
+  tone="cyan"
+  size="sm"
+>
+  @if (recoverySent()) {
+    <generic-text>Revisá la bandeja de {{ recoveryEmail() }}. El enlace vence en 30 minutos.</generic-text>
+  } @else {
+    <generic-input
+      label="Correo institucional"
+      type="email"
+      placeholder="usuario@frt.utn.edu.ar"
+      [value]="recoveryEmail()"
+      (valueChange)="recoveryEmail.set($event)"
+    />
+  }
+  <div footer>
+    @if (recoverySent()) {
+      <generic-button variant="cyan" size="sm" (click)="closeRecovery()">Entendido</generic-button>
+    } @else {
+      <generic-button
+        variant="cyan"
+        size="sm"
+        [disabled]="!recoveryEmail().includes('@')"
+        (click)="sendRecovery()"
+      >
+        Enviar enlace
+      </generic-button>
+    }
+  </div>
+</generic-modal>
+
+<generic-modal [(open)]="registerOpen" title="Registro institucional" tone="magenta" size="sm">
+  <generic-text>
+    Las cuentas se crean desde el sistema académico de la facultad. Si ya sos alumno o docente, tu
+    legajo habilita el acceso sin registro previo.
+  </generic-text>
+  <div footer>
+    <generic-button variant="magenta" size="sm" (click)="registerOpen.set(false)">Entendido</generic-button>
+  </div>
+</generic-modal>

@@ -1,0 +1,99 @@
+<div class="grid">
+  @for (course of courses; track course.id) {
+    <generic-card class="course-card" [tone]="course.tone" padding="none">
+      <div class="head" [class]="course.tone">
+        <div class="head-top">
+          <span class="cohort">{{ course.cohort }}</span>
+          <span class="vitals">
+            <generic-progress
+              [value]="course.lives"
+              [max]="5"
+              [hearts]="true"
+              size="sm"
+              tone="red"
+            />
+            <span class="coins">
+              <generic-icon name="coin" [size]="16" />
+              {{ course.coins }}
+            </span>
+          </span>
+        </div>
+        <generic-title [level]="2" [tone]="course.tone">{{ course.code }}</generic-title>
+        <generic-text size="sm">{{ course.title }}</generic-text>
+      </div>
+      <div class="body">
+        <div class="meta">
+          <generic-badge [tone]="course.tone" appearance="outline" size="sm">
+            {{ course.status }}
+          </generic-badge>
+          <generic-badge tone="gold" appearance="outline" size="sm">{{ course.difficulty }}</generic-badge>
+          <generic-badge tone="neutral" appearance="outline" size="sm">{{ course.language }}</generic-badge>
+          <generic-badge tone="neutral" appearance="outline" size="sm">{{ course.durationLabel }}</generic-badge>
+        </div>
+        <generic-progress
+          [value]="course.progress"
+          [max]="100"
+          label="Progreso del curso"
+          [showValue]="true"
+          [tone]="course.tone"
+        />
+        <div class="actions">
+          <generic-button [variant]="course.tone" (click)="open(course)">Ver Curso</generic-button>
+        </div>
+      </div>
+    </generic-card>
+  }
+</div>
+
+<generic-modal
+  [open]="modalOpen()"
+  (openChange)="modalOpen.set($event)"
+  title="Elegí tu Modo"
+  [subtitle]="selected()?.title || ''"
+  tone="gold"
+  size="md"
+>
+  <div class="modes">
+    <button type="button" class="mode active" (click)="enterSpeedrun()">
+      <generic-icon name="scroll" [size]="28" />
+      <span class="mode-copy">
+        <span class="mode-title">
+          Modo Speedrun
+          <generic-badge tone="cyan" appearance="solid" size="sm">ACTIVO</generic-badge>
+        </span>
+        <generic-text size="sm">
+          Vista estructurada por unidades temáticas, recursos (PDFs, videos) y desafíos.
+        </generic-text>
+      </span>
+    </button>
+    <button type="button" class="mode soon" (click)="adventureOpen.set(true)">
+      <generic-icon name="lock" [size]="28" />
+      <span class="mode-copy">
+        <span class="mode-title">
+          Modo Aventura
+          <generic-badge tone="neutral" appearance="outline" size="sm">PRONTO</generic-badge>
+        </span>
+        <generic-text [muted]="true" size="sm">
+          Roadmap RPG interactivo, mapas visuales con islas flotantes y avatar.
+        </generic-text>
+      </span>
+    </button>
+  </div>
+  <div footer>
+    <generic-button variant="gold" size="sm" (click)="modalOpen.set(false)">Cancelar</generic-button>
+  </div>
+</generic-modal>
+
+<generic-modal
+  [(open)]="adventureOpen"
+  title="Modo Aventura"
+  tone="magenta"
+  size="sm"
+>
+  <generic-text>
+    Todavía en construcción. El roadmap RPG llega en la próxima cohorte.
+  </generic-text>
+  <div footer>
+    <generic-button variant="magenta" size="sm" (click)="adventureOpen.set(false)">Volver</generic-button>
+  </div>
+</generic-modal>

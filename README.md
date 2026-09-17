@@ -1,33 +1,38 @@
-# React + TypeScript + Vite
+# FrontPruebas
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+SPA Angular 21 del monolito TUP. El visual sale de `generic-ui` ([PiposLibrary](https://github.com/pgprimitz/PiposLibrary)).
 
-Currently, two official plugins are available:
+## Arranque local
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+La librería se consume como carpeta hermana (todavía no está en npm):
 
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the Oxlint configuration
-
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+```bash
+git clone https://github.com/pgprimitz/PiposLibrary.git
+cd PiposLibrary
+npm install
+npm run build
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
-# FrontPruebas
+En este repo:
+
+```bash
+npm install
+npm start
+```
+
+Si `generic-ui` se instala como symlink y ves `NG0203` en `input()`, instalá con `install-links` (ya está en `.npmrc`) para que Angular no se duplique con el de PiposLibrary.
+
+Queda en `http://localhost:4200`.
+
+## Dónde trabajar
+
+| Carpeta | Quién |
+|---|---|
+| `src/app/layout`, `src/app/core`, `src/app/pages` | esqueleto compartido |
+| `src/app/teams/team-01` … `team-12` | cada grupo |
+
+Rutas de equipo: `/teams/01` … `/teams/12`.
+
+## Build
+
+`npm run build` usa `baseHref` `/FrontPruebas/` (GitHub Pages).

@@ -1,0 +1,24 @@
+<div class="page">
+  <generic-text>
+    Espacio de trabajo del equipo {{ teamId() }}. Reemplazá el contenido de
+    <code>src/app/teams/team-{{ teamId() }}/</code>
+    con las pantallas de su microservicio. El shell y
+    <code>generic-ui</code>
+    ya están.
+  </generic-text>
+
+  <generic-card tone="neutral">
+    <generic-title [level]="3" tone="neutral">Equipos</generic-title>
+    <div class="teams">
+      @for (id of teams; track id) {
+        <generic-button
+          [variant]="id === teamId() ? 'cyan' : 'ghost'"
+          size="sm"
+          (click)="go(id)"
+        >
+          {{ id }}
+        </generic-button>
+      }
+    </div>
+  </generic-card>
+</div>

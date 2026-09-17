@@ -1,0 +1,36 @@
+<div class="page">
+  <aside class="contacts">
+    <generic-title [level]="2" tone="cyan">Contactos</generic-title>
+    <div class="list">
+      @for (contact of contacts; track contact.id) {
+        <button
+          type="button"
+          class="contact"
+          [class.active]="contact.id === activeId()"
+          (click)="activeId.set(contact.id)"
+        >
+          <span class="avatar">{{ contact.initials }}</span>
+          <span class="copy">
+            <strong>{{ contact.name }}</strong>
+            <generic-text [muted]="true" size="sm">{{ contact.lastMessage }}</generic-text>
+          </span>
+          @if (contact.unread) {
+            <generic-badge tone="magenta" appearance="solid" size="sm">{{ contact.unread }}</generic-badge>
+          }
+        </button>
+      }
+    </div>
+  </aside>
+
+  <section class="pane">
+    <generic-chat class="chat" [name]="active().name" [messages]="active().messages" tone="cyan" />
+    <div class="composer">
+      <generic-input
+        placeholder="Escribí un mensaje"
+        [value]="draft()"
+        (valueChange)="draft.set($event)"
+      />
+      <generic-button variant="cyan" (click)="send()">Enviar</generic-button>
+    </div>
+  </section>
+</div>

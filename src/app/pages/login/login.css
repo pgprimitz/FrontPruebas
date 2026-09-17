@@ -1,0 +1,160 @@
+:host {
+  display: flex;
+  height: 100%;
+  overflow: visible;
+}
+
+.page {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.stage {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  width: 100%;
+}
+
+.left {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.25rem;
+  min-height: 0;
+  overflow: auto;
+}
+
+.panel {
+  width: min(420px, 100%);
+}
+
+.head,
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.head {
+  margin-bottom: 0.85rem;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+
+.submit {
+  display: block;
+}
+
+.submit generic-button {
+  display: flex;
+  width: 100%;
+}
+
+:host ::ng-deep .submit .btn {
+  width: 100%;
+}
+
+.signup {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-top: 0.85rem;
+}
+
+.edition {
+  margin-top: 0.7rem;
+  padding-top: 0.55rem;
+  border-top: 1px solid var(--border-subtle);
+  text-align: center;
+}
+
+.hero {
+  position: relative;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.heroes {
+  position: relative;
+  z-index: 1;
+  width: min(560px, 88%);
+  max-height: 72%;
+  object-fit: contain;
+  mix-blend-mode: lighten;
+  filter: drop-shadow(0 14px 22px rgba(0, 0, 0, 0.45));
+  pointer-events: none;
+}
+
+.gem {
+  position: absolute;
+  z-index: 2;
+  animation: float 3s ease-in-out infinite;
+}
+
+.g1 { top: 10%; left: 10%; animation-delay: 0.2s; }
+.g2 { top: 16%; right: 12%; animation-delay: 0.7s; }
+.g3 { bottom: 22%; left: 8%; animation-delay: 1s; }
+.g4 { bottom: 18%; right: 10%; animation-delay: 0.4s; }
+.g5 { top: 38%; right: 4%; animation-delay: 1.2s; }
+.g6 { top: 44%; left: 6%; animation-delay: 0.9s; }
+.g7 { bottom: 36%; right: 18%; animation-delay: 0.55s; }
+
+.kicker {
+  position: relative;
+  z-index: 1;
+  margin-top: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--accent-secondary);
+}
+
+:host-context([data-theme='light']) .heroes {
+  mix-blend-mode: normal;
+  background: #05070c;
+  border-radius: 18px;
+  padding: 0.4rem;
+}
+
+@keyframes float {
+  0%,
+  100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+@media (max-width: 860px) {
+  .stage {
+    grid-template-columns: 1fr;
+  }
+
+  .left {
+    padding: 0.85rem 0.75rem;
+  }
+
+  .head {
+    flex-wrap: wrap;
+  }
+
+  .row {
+    flex-wrap: wrap;
+  }
+
+  .hero {
+    display: none;
+  }
+}

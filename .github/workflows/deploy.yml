@@ -19,22 +19,30 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          path: FrontPruebas
+
+      - uses: actions/checkout@v4
+        with:
+          repository: pgprimitz/PiposLibrary
+          path: PiposLibrary
 
       - uses: actions/setup-node@v4
         with:
           node-version: 20
 
-      - run: npm ci
-      - run: npm run build
+      - run: npm ci && npm run build
+        working-directory: PiposLibrary
 
-      # Fallback de SPA: GitHub Pages no sabe de rutas de React Router,
-      # así que cualquier ruta desconocida cae al 404.html, que servimos
-      # como una copia de index.html para que la app la resuelva del lado del cliente.
-      - run: cp dist/index.html dist/404.html
+      - run: npm ci && npm run build
+        working-directory: FrontPruebas
+
+      - run: cp dist/front-pruebas/browser/index.html dist/front-pruebas/browser/404.html
+        working-directory: FrontPruebas
 
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: dist
+          path: FrontPruebas/dist/front-pruebas/browser
 
   deploy:
     needs: build
