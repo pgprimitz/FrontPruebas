@@ -4,7 +4,7 @@
       <generic-card tone="cyan" class="panel">
         <div class="head">
           <generic-title>Bienvenido/a</generic-title>
-          <generic-badge tone="cyan" size="sm">INSERT COIN</generic-badge>
+          <generic-badge tone="cyan" size="sm">{{ 'INSERT COIN' | sentenceCase }}</generic-badge>
         </div>
 
         <form class="form" (submit)="$event.preventDefault(); submit()">
@@ -57,7 +57,7 @@
         </div>
 
         <generic-text class="edition" [muted]="true" size="sm">
-          PLATAFORMA GAMIFICADA TUP • 2026 EDITION
+          {{ 'PLATAFORMA GAMIFICADA TUP • 2026 EDITION' | sentenceCase }}
         </generic-text>
       </generic-card>
     </div>
@@ -86,7 +86,9 @@
   size="sm"
 >
   @if (recoverySent()) {
-    <generic-text>Revisá la bandeja de {{ recoveryEmail() }}. El enlace vence en 30 minutos.</generic-text>
+    <generic-callout tone="green" title="Correo enviado">
+      Revisá la bandeja de {{ recoveryEmail() }}. El enlace vence en 30 minutos.
+    </generic-callout>
   } @else {
     <generic-input
       label="Correo institucional"
@@ -113,10 +115,10 @@
 </generic-modal>
 
 <generic-modal [(open)]="registerOpen" title="Registro institucional" tone="magenta" size="sm">
-  <generic-text>
+  <generic-callout tone="neutral" title="Sin alta pública">
     Las cuentas se crean desde el sistema académico de la facultad. Si ya sos alumno o docente, tu
     legajo habilita el acceso sin registro previo.
-  </generic-text>
+  </generic-callout>
   <div footer>
     <generic-button variant="magenta" size="sm" (click)="registerOpen.set(false)">Entendido</generic-button>
   </div>

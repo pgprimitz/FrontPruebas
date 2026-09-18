@@ -1,11 +1,13 @@
 import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
 import {
+  GenericAvatar,
   GenericBadge,
   GenericButton,
   GenericChat,
   GenericInput,
   GenericText,
   GenericTitle,
+  SentenceCasePipe,
 } from 'generic-ui';
 import { CONTACTS, THREADS } from '../../core/mock-data';
 import { ChatThread } from '../../core/models';
@@ -14,12 +16,14 @@ import { ChatThread } from '../../core/models';
   selector: 'app-messages',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
+    GenericAvatar,
     GenericBadge,
     GenericButton,
     GenericChat,
     GenericInput,
     GenericText,
     GenericTitle,
+    SentenceCasePipe,
   ],
   templateUrl: './messages.html',
   styleUrl: './messages.css',

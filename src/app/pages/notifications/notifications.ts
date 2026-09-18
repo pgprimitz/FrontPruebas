@@ -2,36 +2,43 @@ import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/c
 import {
   GenericBadge,
   GenericButton,
+  GenericEmptyState,
   GenericIcon,
+  GenericTabs,
   GenericText,
   GenericTitle,
+  SentenceCasePipe,
 } from 'generic-ui';
-import type { GenericIconName } from 'generic-ui';
+import type { GenericIconName, GenericTabItem } from 'generic-ui';
 import { NOTIFICATIONS } from '../../core/mock-data';
 import { NotificationRow } from '../../core/models';
 
 type NoticeFilter = 'todas' | 'logro' | 'desafio' | 'mensaje';
 
-interface FilterChip {
-  id: NoticeFilter;
-  label: string;
-}
-
 @Component({
   selector: 'app-notifications',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [GenericBadge, GenericButton, GenericIcon, GenericText, GenericTitle],
+  imports: [
+    GenericBadge,
+    GenericButton,
+    GenericEmptyState,
+    GenericIcon,
+    GenericTabs,
+    GenericText,
+    GenericTitle,
+    SentenceCasePipe,
+  ],
   templateUrl: './notifications.html',
   styleUrl: './notifications.css',
 })
 export class Notifications {
   readonly filter = signal<NoticeFilter>('todas');
   readonly items = signal<NotificationRow[]>(NOTIFICATIONS.map((row) => ({ ...row })));
-  readonly filters: FilterChip[] = [
+  readonly filterTabs: GenericTabItem[] = [
     { id: 'todas', label: 'Todas' },
-    { id: 'logro', label: 'Logros' },
-    { id: 'desafio', label: 'Desafíos' },
-    { id: 'mensaje', label: 'Mensajes' },
+    { id: 'logro', label: 'Logros', icon: 'trophy' },
+    { id: 'desafio', label: 'Desafíos', icon: 'fire' },
+    { id: 'mensaje', label: 'Mensajes', icon: 'chat' },
   ];
 
   readonly visible = computed(() => {
@@ -62,6 +69,12 @@ export class Notifications {
     if (row.type === 'desafio') return 'Desafío';
     if (row.type === 'mensaje') return 'Mensaje';
     return 'Sistema';
+  }
+
+  onTab(tab: GenericTabItem): void {
+    if (tab.id === 'todas' || tab.id === 'logro' || tab.id === 'desafio' || tab.id === 'mensaje') {
+      this.filter.set(tab.id);
+    }
   }
 
   markRead(id: string): void {

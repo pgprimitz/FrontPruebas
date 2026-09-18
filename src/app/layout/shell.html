@@ -1,47 +1,17 @@
-<header class="bar">
-  <button class="brand" type="button" (click)="go('/my-courses')">
-    <generic-icon name="trophy" [size]="22" label="TUP" />
-    <span class="brand-copy">
-      <generic-title class="brand-title" [level]="3" tone="cyan">TUP Arcade</generic-title>
-      <generic-text class="brand-sub" [muted]="true" size="sm">Plataforma gamificada</generic-text>
-    </span>
-  </button>
-
-  <div class="actions">
-    <button type="button" class="icon-btn" aria-label="Mensajes" (click)="go('/messages')">
-      <generic-icon name="chat" [size]="20" />
-    </button>
-    <button type="button" class="icon-btn" aria-label="Notificaciones" (click)="go('/notifications')">
-      <generic-icon name="bell" [size]="20" />
-    </button>
-    <button
-      type="button"
-      class="icon-btn"
-      [attr.aria-label]="dark() ? 'Tema claro' : 'Tema oscuro'"
-      (click)="toggleTheme()"
-    >
-      <generic-icon [name]="dark() ? 'star' : 'fire'" [size]="20" />
-    </button>
-    <div class="user">
-      <generic-icon name="user" [size]="20" />
-      <strong>{{ legajo() }}</strong>
-      <generic-dropdown label="" [items]="accountItems" align="right" (itemSelect)="onAccount($event)" />
-    </div>
+<generic-navbar
+  brandLabel="TUP Arcade"
+  [items]="navItems"
+  [activeId]="activeNavId()"
+  (itemClick)="onNav($event)"
+>
+  <div account class="who" [class.active]="onProfile()">
+    <button type="button" class="who-id" (click)="go('/profile')">{{ displayName() }}</button>
+    <generic-dropdown label="" [items]="accountItems" align="right" (itemSelect)="onAccount($event)" />
   </div>
-</header>
+</generic-navbar>
 
 <div class="page-head">
-  <nav class="crumbs" aria-label="Navegación">
-    @for (crumb of crumbs(); track $index) {
-      @if (!$last) {
-        <button type="button" class="crumb" (click)="go(crumb.path)">{{ crumb.label }}</button>
-        <span class="sep">/</span>
-      } @else {
-        <span class="crumb current">{{ crumb.label }}</span>
-      }
-    }
-  </nav>
-  <generic-title>{{ pageTitle() }}</generic-title>
+  <generic-breadcrumb [items]="crumbItems()" (itemClick)="onCrumb($event)" />
 </div>
 
 <main class="main">

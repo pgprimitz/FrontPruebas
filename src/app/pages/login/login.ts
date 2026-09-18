@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import {
   GenericBadge,
   GenericButton,
+  GenericCallout,
   GenericCard,
   GenericCheckbox,
   GenericIcon,
@@ -12,6 +13,7 @@ import {
   GenericSpinner,
   GenericText,
   GenericTitle,
+  SentenceCasePipe,
 } from 'generic-ui';
 import type { GenericSelectOption } from 'generic-ui';
 import { UserRole } from '../../core/models';
@@ -24,6 +26,7 @@ import { SiteFooter } from '../../layout/site-footer';
   imports: [
     GenericBadge,
     GenericButton,
+    GenericCallout,
     GenericCard,
     GenericCheckbox,
     GenericIcon,
@@ -33,6 +36,7 @@ import { SiteFooter } from '../../layout/site-footer';
     GenericSpinner,
     GenericText,
     GenericTitle,
+    SentenceCasePipe,
     SiteFooter,
   ],
   templateUrl: './login.html',

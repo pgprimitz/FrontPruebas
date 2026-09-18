@@ -15,8 +15,8 @@ export interface Course {
   coins: number;
   tone: 'cyan' | 'magenta';
   courseTone: 'celeste' | 'rosa';
-  status: string;
-  difficulty: string;
+  status: 'Cursando';
+  difficulty: 'beginner' | 'intermediate' | 'advanced';
   language: string;
   durationLabel: string;
 }

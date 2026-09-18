@@ -7,18 +7,7 @@
     </div>
   }
 
-  <div class="filters">
-    @for (chip of filters; track chip.id) {
-      <button
-        type="button"
-        class="chip"
-        [class.active]="filter() === chip.id"
-        (click)="filter.set(chip.id)"
-      >
-        {{ chip.label }}
-      </button>
-    }
-  </div>
+  <generic-tabs [tabs]="filterTabs" [activeId]="filter()" (tabChange)="onTab($event)" />
 
   <div class="list">
     @for (row of visible(); track row.id) {
@@ -26,28 +15,37 @@
         <generic-icon [name]="iconFor(row)" [size]="22" />
         <div class="copy">
           <div class="top">
-            <generic-title [level]="3" [tone]="toneFor(row)">{{ row.title }}</generic-title>
+            <generic-title [level]="3" [tone]="toneFor(row)">{{ row.title | sentenceCase }}</generic-title>
             <generic-badge [tone]="toneFor(row)" appearance="outline" size="sm">
-              {{ typeLabel(row) }}
+              {{ typeLabel(row) | sentenceCase }}
             </generic-badge>
           </div>
-          <generic-text size="sm">{{ row.description }}</generic-text>
+          <generic-text size="sm">{{ row.description | sentenceCase }}</generic-text>
           <div class="meta">
             <generic-text [muted]="true" size="sm">{{ row.when }}</generic-text>
-            @if (row.type !== 'logro' && row.xp) {
-              <generic-badge tone="cyan" appearance="solid" size="sm">+{{ row.xp }} XP</generic-badge>
+            @if (row.xp) {
+              <span class="reward">+{{ row.xp }}</span>
             }
-            @if (row.type !== 'logro' && row.coins) {
-              <generic-badge tone="gold" appearance="solid" size="sm">+{{ row.coins }}</generic-badge>
+            @if (row.coins) {
+              <span class="reward coins">+{{ row.coins }}</span>
             }
           </div>
         </div>
-        @if (!row.read) {
-          <button type="button" class="mark" (click)="markRead(row.id)">Marcar como leída</button>
-        }
+        <button
+          type="button"
+          class="mark"
+          [class.done]="row.read"
+          [attr.aria-label]="row.read ? 'Leída' : 'Marcar como leída'"
+          (click)="markRead(row.id)"
+        >
+          <generic-icon name="check" [size]="18" />
+        </button>
       </article>
     } @empty {
-      <generic-text [muted]="true">No hay avisos en este filtro.</generic-text>
+      <generic-empty-state
+        title="No hay avisos en este filtro"
+        description="Cuando llegue un logro, desafío o mensaje, aparece acá."
+      />
     }
   </div>
 </div>

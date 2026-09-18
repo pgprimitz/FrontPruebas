@@ -1,11 +1,11 @@
 import { ChangeDetectionStrategy, Component, inject, input } from '@angular/core';
 import { Router } from '@angular/router';
-import { GenericButton, GenericCard, GenericText, GenericTitle } from 'generic-ui';
+import { GenericButton, GenericCallout, GenericCard, GenericTitle } from 'generic-ui';
 
 @Component({
   selector: 'app-team-workspace',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [GenericButton, GenericCard, GenericText, GenericTitle],
+  imports: [GenericButton, GenericCallout, GenericCard, GenericTitle],
   templateUrl: './team-workspace.html',
   styleUrl: './team-workspace.css',
 })

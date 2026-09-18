@@ -1,15 +1,18 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import {
   GenericBadge,
   GenericButton,
   GenericCard,
-  GenericIcon,
-  GenericModal,
+  GenericCoinCounter,
+  GenericCourseMetaBadges,
+  GenericCourseModal,
   GenericProgress,
   GenericText,
   GenericTitle,
+  SentenceCasePipe,
 } from 'generic-ui';
+import type { GenericCourseBadge } from 'generic-ui';
 import { COURSES } from '../../core/mock-data';
 import { Course } from '../../core/models';
 
@@ -20,11 +23,13 @@ import { Course } from '../../core/models';
     GenericBadge,
     GenericButton,
     GenericCard,
-    GenericIcon,
-    GenericModal,
+    GenericCoinCounter,
+    GenericCourseMetaBadges,
+    GenericCourseModal,
     GenericProgress,
     GenericText,
     GenericTitle,
+    SentenceCasePipe,
   ],
   templateUrl: './my-courses.html',
   styleUrl: './my-courses.css',
@@ -34,7 +39,15 @@ export class MyCourses {
   readonly courses = COURSES;
   readonly selected = signal<Course | null>(null);
   readonly modalOpen = signal(false);
-  readonly adventureOpen = signal(false);
+
+  readonly selectedBadges = computed<GenericCourseBadge[]>(() => {
+    const course = this.selected();
+    if (!course) return [];
+    return [
+      { label: course.status, tone: course.tone, appearance: 'outline' },
+      { label: course.language, tone: 'neutral', appearance: 'outline' },
+    ];
+  });
 
   open(course: Course): void {
     this.selected.set(course);

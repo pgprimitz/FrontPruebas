@@ -1,6 +1,6 @@
 <div class="page">
   <aside class="contacts">
-    <generic-title [level]="2" tone="cyan">Contactos</generic-title>
+    <generic-title [level]="2" tone="cyan">{{ 'Contactos' | sentenceCase }}</generic-title>
     <div class="list">
       @for (contact of contacts; track contact.id) {
         <button
@@ -9,10 +9,10 @@
           [class.active]="contact.id === activeId()"
           (click)="activeId.set(contact.id)"
         >
-          <span class="avatar">{{ contact.initials }}</span>
+          <generic-avatar [name]="contact.name" size="sm" ring="cyan" />
           <span class="copy">
             <strong>{{ contact.name }}</strong>
-            <generic-text [muted]="true" size="sm">{{ contact.lastMessage }}</generic-text>
+            <generic-text [muted]="true" size="sm">{{ contact.lastMessage | sentenceCase }}</generic-text>
           </span>
           @if (contact.unread) {
             <generic-badge tone="magenta" appearance="solid" size="sm">{{ contact.unread }}</generic-badge>

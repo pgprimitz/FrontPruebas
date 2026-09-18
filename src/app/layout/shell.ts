@@ -2,46 +2,41 @@ import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/c
 import { toSignal } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import {
+  GenericBreadcrumb,
   GenericDropdown,
-  GenericIcon,
   GenericMenuItem,
-  GenericText,
-  GenericTitle,
-  ThemeService,
+  GenericNavbar,
 } from 'generic-ui';
+import type { GenericBreadcrumbItem, GenericNavItem } from 'generic-ui';
 import { filter, map, startWith } from 'rxjs';
 import { COURSES } from '../core/mock-data';
 import { SessionService } from '../core/session.service';
 import { SiteFooter } from './site-footer';
 
-interface Crumb {
-  label: string;
-  path: string;
-}
-
 @Component({
   selector: 'app-shell',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterOutlet, GenericDropdown, GenericIcon, GenericText, GenericTitle, SiteFooter],
+  imports: [
+    RouterOutlet,
+    GenericBreadcrumb,
+    GenericDropdown,
+    GenericNavbar,
+    SiteFooter,
+  ],
   templateUrl: './shell.html',
   styleUrl: './shell.css',
 })
 export class Shell {
   private readonly router = inject(Router);
   private readonly session = inject(SessionService);
-  readonly theme = inject(ThemeService);
 
   readonly user = this.session.user;
-  readonly dark = computed(() => this.theme.theme() === 'dark');
-  readonly legajo = computed(() => {
-    const name = this.user()?.username?.trim() || '';
-    if (!name) return '000000';
-    if (name.includes('@')) {
-      const digits = name.replace(/\D/g, '');
-      return digits || '412349';
-    }
-    return name;
-  });
+  readonly displayName = computed(() => this.user()?.username?.trim() || 'Alumno');
+  readonly navItems: GenericNavItem[] = [
+    { id: 'courses', label: 'Cursos', icon: 'scroll' },
+    { id: 'messages', label: 'Mensajes', icon: 'chat' },
+    { id: 'notifications', label: 'Avisos', icon: 'bell' },
+  ];
   readonly accountItems: GenericMenuItem[] = [
     { id: 'profile', label: 'Perfil' },
     { id: 'logout', label: 'Salir', danger: true },
@@ -56,15 +51,31 @@ export class Shell {
     { initialValue: this.router.url },
   );
 
-  readonly crumbs = computed<Crumb[]>(() => this.navFor(this.url()).crumbs);
-  readonly pageTitle = computed(() => this.navFor(this.url()).title);
+  readonly crumbItems = computed<GenericBreadcrumbItem[]>(() => this.navFor(this.url()).crumbs);
+  readonly activeNavId = computed(() => {
+    const path = this.url().split('?')[0];
+    if (path.startsWith('/messages')) return 'messages';
+    if (path.startsWith('/notifications')) return 'notifications';
+    if (path.startsWith('/profile')) return null;
+    return 'courses';
+  });
 
   go(path: string): void {
     void this.router.navigateByUrl(path);
   }
 
-  toggleTheme(): void {
-    this.theme.toggle();
+  onProfile(): boolean {
+    return this.url().split('?')[0].startsWith('/profile');
+  }
+
+  onNav(item: GenericNavItem): void {
+    if (item.id === 'courses') this.go('/my-courses');
+    if (item.id === 'messages') this.go('/messages');
+    if (item.id === 'notifications') this.go('/notifications');
+  }
+
+  onCrumb(item: GenericBreadcrumbItem): void {
+    if (item.href) this.go(item.href);
   }
 
   onAccount(item: GenericMenuItem): void {
@@ -75,34 +86,51 @@ export class Shell {
     }
   }
 
-  private navFor(url: string): { crumbs: Crumb[]; title: string } {
+  private navFor(url: string): { crumbs: GenericBreadcrumbItem[]; title: string } {
     const path = url.split('?')[0];
-    const home: Crumb = { label: 'Inicio', path: '/my-courses' };
-    const courses: Crumb = { label: 'Mis cursos', path: '/my-courses' };
+    const home: GenericBreadcrumbItem = { id: 'home', label: 'Inicio', href: '/my-courses' };
+    const courses: GenericBreadcrumbItem = {
+      id: 'courses',
+      label: 'Mis cursos',
+      href: '/my-courses',
+    };
 
     if (path.startsWith('/course/')) {
       const id = path.split('/')[2] ?? '';
       const course = COURSES.find((item) => item.id === id);
       const title = course?.title || course?.code || 'Curso';
       return {
-        crumbs: [home, courses, { label: title, path }],
+        crumbs: [home, courses, { id: 'course', label: title, href: path }],
         title,
       };
     }
 
     if (path.startsWith('/notifications')) {
-      return { crumbs: [home, { label: 'Notificaciones', path: '/notifications' }], title: 'Notificaciones' };
+      return {
+        crumbs: [home, { id: 'notifications', label: 'Notificaciones', href: '/notifications' }],
+        title: 'Notificaciones',
+      };
     }
     if (path.startsWith('/messages')) {
-      return { crumbs: [home, { label: 'Mensajes', path: '/messages' }], title: 'Mensajes' };
+      return {
+        crumbs: [home, { id: 'messages', label: 'Mensajes', href: '/messages' }],
+        title: 'Mensajes',
+      };
     }
     if (path.startsWith('/profile')) {
-      return { crumbs: [home, { label: 'Perfil', path: '/profile' }], title: 'Perfil' };
+      return {
+        crumbs: [home, { id: 'profile', label: 'Perfil', href: '/profile' }],
+        title: 'Perfil',
+      };
     }
     if (path.startsWith('/teams/')) {
       const id = path.split('/')[2] ?? '01';
       return {
-        crumbs: [home, { label: 'Equipos', path: `/teams/${id}` }, { label: `Grupo ${id}`, path }],
+        crumbs: [
+          home,
+          { id: 'teams', label: 'Equipos', href: `/teams/${id}` },
+          { id: 'team', label: `Grupo ${id}`, href: path },
+        ],
         title: `Grupo ${id}`,
       };
     }

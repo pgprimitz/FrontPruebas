@@ -126,7 +126,7 @@
 
 :host-context([data-theme='light']) .heroes {
   mix-blend-mode: normal;
-  background: #05070c;
+  background: var(--bg-surface-alt);
   border-radius: 18px;
   padding: 0.4rem;
 }

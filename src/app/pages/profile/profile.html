@@ -1,8 +1,26 @@
 <div class="page">
+  <div class="hero">
+    <generic-avatar [name]="name" size="xl" [level]="12" ring="gold" />
+    <div class="identity">
+      <generic-level-badge [level]="12" tone="gold" size="lg" />
+      <generic-streak-flame [days]="5" />
+      <generic-coin-counter [count]="730" size="lg" />
+    </div>
+    <generic-xp-bar [currentXp]="850" [levelXp]="1000" [level]="12" caption="XP del nivel" />
+  </div>
+
   <div class="stats">
     <generic-stat label="XP total" [value]="9850" icon="trophy" tone="gold" />
     <generic-stat label="Monedas" [value]="730" icon="coin" tone="cyan" />
     <generic-stat label="Logros" [value]="14" icon="medal" tone="magenta" />
     <generic-stat label="Cursos" [value]="2" icon="scroll" tone="green" />
   </div>
+
+  <generic-badge-showcase [badges]="badges" (badgeClick)="onBadge($event)" />
+
+  @if (selectedBadge(); as badge) {
+    <generic-callout [tone]="badge.earned ? 'green' : 'gold'" [title]="badge.label">
+      {{ badge.description || (badge.earned ? 'Insignia obtenida.' : 'Todavía no la desbloqueaste.') }}
+    </generic-callout>
+  }
 </div>
